@@ -1,0 +1,8 @@
+@(value:Long,exponent:String)
+@import java.lang.Double; var amount  = 0D
+@if(exponent.toLong <= 0L){
+	@value
+}else{
+	@{amount =  value * Math.pow(10,-(exponent.toLong))}
+	@String.format("%."+exponent+"f", new java.lang.Double(amount))
+}

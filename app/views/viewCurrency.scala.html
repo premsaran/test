@@ -1,0 +1,223 @@
+
+@(currencyList:List[entity.Currency])
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Currency</a></li>
+        </ol>
+    </div>
+</div>
+
+        <!-- page start-->
+		
+		<button class="btn aff-tr-blue aff-txt-silver createCurrency" type="button" onclick="createCurrency()">Create <i class="fa fa-plus-square"></i></button>
+		<div class="row" id="currencyList" >
+                     <div class="col-md-12">
+                        <table class="table table-bordered  table-hover table-striped" id="currencyTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                                 <th><i class="fa fa-user"></i> Currency Name</th>
+                                 <th><i class="fa fa-bookmark"></i> Currency Code</th>
+								 <th> Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+						   @for(currency <- currencyList){
+						    <tr>
+							   <td >
+							   <div class="customerName">@currency.getCurrencyName()</div>
+							    <div class="editCustomerName" style="display:none"><input type="text"  class="customerNameText form-control" value="@currency.getCurrencyName()" style="width: 100%"></div>
+							   </td>
+							   <td>
+							   <div class="customerCode">@currency.getCurrencyCode()</div>
+							   <div class="editCustomerCode" style="display:none"><input type="text"  class="customerCodeText form-control" value="@currency.getCurrencyCode()" style="width: 100%">
+							   <input type="hidden"  class="customerIdText form-control" value="@currency.getCurrencyId()">
+							   </div>
+							   </td>
+							   <td class="text-center customerActionBtn">
+							   <a href="#" class="editCustomer" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement='bottom'></i></span></a>
+							   </td>
+							   </tr>
+						   }
+						   </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  <div class="col-md-12" id="createCurrencyForm" style="display:none">
+<form id="currencyForm" method="post">
+<div class="row">
+<div class="col-md-1">
+<button class="btn aff-tr-blue aff-txt-silver addCurrency" type="button" onclick="addCurrency()">Add <i class="fa fa-plus-square"></i></button>
+</div>
+<div class="col-md-4">
+<span class="currencyError" style="color:red;display:none;">Empty values not allowed</span>
+</div>
+</div>
+</br>
+    <div class="row">
+        <div class="form-group">
+			<div style="display: block">
+				<label class="control-label col-md-2">Currency Code</label>
+			</div>
+			<div style="display: block">
+				<label class="control-label col-md-2">Currency Name</label>
+			</div>	
+			
+		</div>
+	</div>
+	<div class="currencyRow"></div>
+<br><br>
+      <div align="center" class="col-md-6">
+         <button class="btn btn-primary submit" type="button" onclick="validCurrency()"><i class="fa fa-check"></i> Submit</button>
+         <button class="btn btn-danger cancel" onclick="alertModal('cancelCurrency','cancel')" type="button"><i class="fa fa-times"></i> Cancel</button>
+         <button class="btn btn-danger close"  onclick="alertModal('closeCurrency','close')" type="button"><i class="fa fa-times"></i> Close</button>
+      </div>
+</form>
+</div>
+<form id="updateCustomerForm" method="post">
+<div class="editCustomerValues"></div>
+</form>
+@views.html.alertModal()
+<script>
+$(function(){
+	 $('input[name=currency]').focus();
+	 
+	$('#createCurrencyForm').hide();
+	$('#currencyTable').dataTable({
+		 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+			  "iDisplayLength": 10
+	 });
+	 $('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+   if($('#currencyTable tbody tr').length>10)
+	{   
+	   $('.next').attr('class','next');
+   	}
+	$('#currencyTable_filter input').addClass('form-control');
+	$("#currencyTable_filter input").attr("placeholder", "Type here to search");
+	
+});
+
+function createCurrency() {
+	$('#createCurrencyForm').show();
+	$('.cancel').show();
+	$('.submit').show();
+	$('.close1').hide();
+	$('.createCurrency').hide();
+	$('#currencyList').hide();
+	$('#currencyForm').show();
+}
+
+function cancelCurrency() {
+	location.reload();
+	$('#createCurrencyForm').hide();
+	$('#currencyList').show();
+	$('.createCurrency').show();
+	$('#CurrencyForm').hide();
+}
+
+function closeCurrency() {
+	location.reload();
+	$('#currencyList').show();
+	$('.createCurrency').show();
+	$('#currencyForm').hide();
+}
+
+$(function(){
+	for(var i=0;i<3;i++){
+		 addCurrency();
+	}
+});
+
+var j=0;
+function validCurrency(){
+for(var k=0;k<=j;k++){
+if($('.validCode_'+k).val() == 'undefined' || $('.validCode_'+k).val() == "" || $('.validName_'+k).val() == 'undefined' || $('.validName_'+k).val() == ""){
+$('.currencyError').fadeIn();
+$('.currencyError').fadeOut(3000);
+return false;
+}
+}
+alertModal('submitCurrency','submit');
+}
+
+function submitCurrency(){
+	var count=0;
+	for(var k=0;k<=j;k++){
+		if(typeof $('.validCode_'+k).val() != 'undefined'){
+			$('.validCode_'+k).attr('name','currency['+count+'].currencyCode');
+			$('.validName_'+k).attr('name','currency['+count+'].currencyName');
+			count++;
+		}
+	}
+	
+	 $('#currencyForm').attr('action','/createCurrency');
+	 $('#currencyForm').submit();
+}
+
+function addCurrency() {
+var row='<div class="row margin-top-5px">'+
+                  '<div class="form-group">'+
+		'<div class="col-md-2" style="display: block">'+
+			'<input type="text"  class="form-control currencyName validCode_'+j+'"  placeholder="Enter Currency Code" name="currency['+j+'].currencyCode">'+
+			'<input type="hidden" class="tenantId" name="currency['+j+'].tenant.tenantId" value="@session.get("tenantId")">'+
+		'</div>'+
+		'<div class="col-md-2" style="display: block">'+
+			'<input type="text"  class="form-control currencyCode validName_'+j+'" placeholder="Enter Currency Name" name="currency['+j+'].currencyName">'+
+		'</div>'+
+		'</div>';
+		if(j!=0) {
+			row=row+'<div class="col-lg-1 remove"><a href="#"><i class="fa fa-times" title="Delete"></i></a>';
+		}
+   row=row+'</div>';
+   j++;
+	$('.currencyRow').append(row);
+}
+
+$(document).on('click','.remove',function() {
+	$(this).parent('div').remove();
+});
+
+$(document).on('click','.editCustomer',function()
+		{
+			
+			$(this).closest('tr').find('.editCustomerName').show();
+		    $(this).closest('tr').find('.editCustomerCode').show();
+		    $(this).closest('tr').find('.customerName').hide();
+		    $(this).closest('tr').find('.customerCode').hide();
+		    
+			 $(this).closest('tr').find('.customerActionBtn').html('<a class="editSave" onclick="editsave(this)" href="javascript:;"><i class="fa fa-save aff-action-save editSave" title="@Messages("save")">  </i></a>  <a onclick="cancel(this)" class="cancelSave" href="javascript:;"><i class="fa fa-undo aff-action-undo cancel" title="@Messages("cancel")">  </i></a>');
+			 
+		});
+
+		function cancel(data)
+		{
+			$(data).closest('tr').find('.customerCodeText').val($(data).closest('tr').find('.customerCode').text());
+			$(data).closest('tr').find('.customerNameText').val($(data).closest('tr').find('.customerName').text());
+			$(data).closest('tr').find('.editCustomerName').hide();
+		    $(data).closest('tr').find('.editCustomerCode').hide();
+		    $(data).closest('tr').find('.customerName').show();
+		    $(data).closest('tr').find('.customerCode').show();
+			$(data).closest('tr').find('.customerActionBtn').html('<a href="#" class="editCustomer" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement="bottom"></i></span></a>');
+		}
+
+
+
+		function editsave(data)
+		{
+			$('.editCustomerValues').html('');
+			
+			var customerdetail='<input type="hidden"  value="'+$(data).closest('tr').find('.customerNameText').val()+'" name="currencyName">'
+		 	 	 +'<input type="hidden"  value="'+$(data).closest('tr').find('.customerCodeText').val()+'" name="currencyCode">'
+		 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.customerIdText').val()+'" name="currencyId">'
+		 	 	+'<input type="hidden"  name="tenant.tenantId" value="@session.get("tenantId")">';
+		 	 	$('.editCustomerValues').append(customerdetail);
+		 	 	 $('#updateCustomerForm').attr('action','/updateCurrency');
+			 $('#updateCustomerForm').submit();
+			
+			 
+			 
+		}
+</script> 
+}

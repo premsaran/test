@@ -1,0 +1,508 @@
+@(statusList:List[entity.Status])
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Ledger Report</a></li>
+        </ol>
+    </div>
+</div>
+
+<div class="col-md-12">
+<form id="reportForm" class="form-horizontal" action="@controllers.routes.ReportController.downloadReport()" method="post">
+	<input type="hidden" id="reportId" name="reportId" value="@play.Play.application().configuration().getString("application.report.ledger.id")">
+		
+		<div class="row margin-top-5px">
+		   <div class="form-group">
+		   
+	            <label class="col-md-2 control-label  right-align-text">Account Name <span class="aff-color-red" style="position: absolute !important;"&nbsp; *</span></label>
+	            <div class="col-md-2">	
+	               <input type="text"  class="form-control fromAcc" name="searchVendor" id="fromAcc" placeholder="Search Account Name" autocomplete="off">
+	               <span class="aff-color-red transferError" style="display: none">This Field Is Required!</span>
+	            </div>
+	            
+		       <!--<div style="display: none">
+		           		<label class="col-md-2 control-label  right-align-text">To Account</label>
+		           		<div class="col-md-2">	
+		              		<input type="text"  class="form-control toAcc" name="searchVendor" id="toAcc" placeholder="Search To Account" autocomplete="off"> 
+		            	</div>
+		         	</div> -->
+		         
+	         	<label class="col-md-2 control-label  right-align-text">Currency Name<span class="aff-color-red" style="position: absolute !important;">&nbsp;*</span></label>
+	            <div class="col-md-2">	
+	               	<input type="text" class="form-control fromCurrency" name="searchCurrency" onfocusout="disableFunction()"  id="fromCurrency" placeholder="Search Currency Name" autocomplete="off">
+	                <span class="aff-color-red transferError" style="display: none">This Field Is Required!</span>
+	            </div>
+            
+             	<input type="hidden" id="fromAccountId" name="fromAccountId">
+               	<input type="hidden" id="flags" name="flag">
+               	<input type="hidden" id="fromAccountName" name="accountName">
+                <input type="hidden" id="currencyId" name="currencyId">
+                <input type="hidden" id="toCurrencyCode" name="currencyCode">
+                <input type="hidden" id="toAccountId" name="toAccountId" >
+         </div>
+      </div>
+      
+   <!--<div class="row margin-top-5px"style="display: none">
+    	<div class="form-group">
+            	<label class="control-label col-md-2 right-align-text">From Currency</label>
+            <div class="col-md-2">	
+               <input type="text" class="form-control fromCurrency" name="searchCurrency" id="fromCurrency" placeholder="Search From Currency">
+                <input type="hidden" id="currencyId" name="currencyId">
+            </div>
+            <div style="display: none">
+             	<label class="control-label col-md-2 right-align-text">To Currency</label>
+            <div class="col-md-2">	
+               <input type="text"  class="form-control toCurrency" name="searchCurrency" id="toCurrency" placeholder="Search To Currency">
+                <input type="hidden" id="toCurrencyId" name="toCurrencyId">
+                </div>
+            </div>
+         </div>
+      </div>  -->  
+      
+      <div class="row margin-top-5px">
+	    <div class="form-group">
+	    <!--  <label class="text-right col-lg-2 "> Status</label>
+	    	<div class="col-md-2">
+						<select class="form-control" id="statusId">
+							<option value="">--select--</option> @for(status <-statusList){
+							<option value="@status.getStatusId()">@status.getStatusName()</option>
+							}
+						</select> 
+						<input type="hidden" id="hiddenStatus" name="statusId">
+					</div> -->
+				 
+	    		<div id="debitorcredit">
+	                <label class="text-right control-label  col-lg-2"> As On Date</label>
+	                   <div class="col-lg-1">
+	                      <input type="radio" class="creditDebitCheckbox" name="dateField" onclick="dateAsOnDate()" value="asOnDate" id="asOnDateRadio" data-rule-required="true"/>
+	                   </div>
+	                   <div class="" id="selectDate">
+	                      <label class="text-right control-label  col-lg-2">Select Date</label>
+	                      <div class="col-lg-1">
+	                         <input type="radio" class="creditDebitCheckbox" name="dateField" onclick="dateAsOnDate()" value="date" id="dateRadio" data-rule-required="true"/>
+	                      </div>
+	                 </div>
+	           </div>
+	      </div>
+      </div>
+      
+       	<div class="row margin-top-5px">
+			   <div class="form-group startEndDate" style="display:none">
+					<div style="display: block">
+						<label class="col-md-2 control-label  right-align-text">From Date</label>
+						<div class="col-md-2">	
+							<input type="text"  class="form-control frmdate" placeholder="Enter From  Date" name="startDate"  data-date-format="dd/mm/yyyy" id="fromdate" autocomplete="off">
+						</div>
+					</div>
+					<div style="display: block">
+						<label class="col-md-2 control-label  right-align-text">To Date</label>
+						<div class="col-md-2">
+							<input type="text"  class="form-control" placeholder="Enter To Date" name="endDate" data-date-format="dd/mm/yyyy" id="todate" autocomplete="off">
+						</div>
+					</div>
+			   </div>
+			   
+		   	  <div class="form-group" id="asOnDate">
+                 <label class="text-right control-label  col-lg-2"> Date</label>
+                 <div class="col-md-2">
+					<input type="text"  class="form-control asdate" placeholder="Enter To Date" name="endDate" data-date-format="dd/mm/yyyy" id="asOndate" autocomplete="off">
+				 </div>
+              </div>
+		</div>
+		
+		<br>
+			<div id="debitorFlags">
+				 <div class="" id="foriegn">
+                      <label class="text-right control-label  col-lg-2">Foreign Currency</label>
+                      <div class="col-lg-1">
+                         <input type="radio" class="creditDebitCheckbox" name="foriegnDr" onclick="localDrAmt()" value="foriegendrAmt" id="foriegnRadio" data-rule-required="true"/>
+                      </div>
+                 </div>
+					<label class="text-right col-lg-2 control-label ">Local Currency</label>
+                   	 <div class="col-lg-1">
+                      	<input type="radio" class="creditDebitCheckbox" name="foriegnDr" onclick="localDrAmt()" value="localdrAmt" id="localRadio" data-rule-required="true"/>
+                   	 </div>
+         	</div>
+    
+    
+		<br><br>
+      	<div align="center">
+      		<button type="button" class="btn btn-success" onclick="viewLedgerReport()"><i class="fa fa-eye"></i> View</button>	
+        	<button class="btn btn-primary submit"  onclick="submitReport()" type="button"><i class="fa fa-download"></i> Download</button>
+        	<button type="button" onclick="refresh()" class="btn btn-dark"><i class="fa fa-refresh"></i> Reset</button>
+      	</div>
+      	
+      <br><br>
+  </form> 
+</div>  
+
+  		<div class="col-md-12" id="viewModal" style="display:none">
+	          <button type="button" class="close" onclick="modalClose()">&times;</button>
+	          <h5 class="modal-title control-label" align="center">Ledger Summary </h5>
+	          <br>
+	          	<table class="table" id="ledgerSummary">
+                     <thead style="text-align: center;">
+                        <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                           <th style="text-align: center;">Date</th>
+                           <th style="text-align: center;">No</th>
+                           <th style="text-align: center;">To Account</th>
+                           <th class="col-md-3" style="text-align: center;">Detail</th>
+                           <th style="text-align: center;">Amount</th>
+						 	<th style="text-align: center;">Rate</th>
+						 	<th style="text-align: center;">Cnv Amt</th>
+						 	<th class='text-right' style="text-align: center;">Dr</th>
+						 	<th class='text-right' style="text-align: center;">Cr</th>
+						 	<th class="text-right" style="text-align: center;">Balance</th>
+                        </tr>
+                     </thead>
+                     <tbody class="ledgerTable">
+   					 </tbody>
+               </table>
+	         <div align="center">
+	         <button type="button" class="btn btn-danger" onclick="modalClose()">&times; Close</button>               
+	        </div>
+        </div>
+  
+
+
+@views.html.commonJs()
+<script>
+
+$(function () {
+	$('input[name=searchVendor]').focus();
+	
+	$.extend($.fn.autoNumeric.defaults,{
+		aSep: ',',              
+		aDec: '.' ,
+        mDec: '@session.get("exponent")',
+        dGroup: '3',	
+        vMin: -99999999999999.9999,
+        vMax: 99999999999999.9999
+	}); 
+
+	
+	  var dateFormat = $.datepicker.formatDate('dd/mm/yy', new Date());
+	    $('#asOndate').val(dateFormat);
+	    $('#fromdate').val(dateFormat);
+	    $('#todate').val(dateFormat);
+	            
+	  $("#asOndate").datepicker({ dateFormat: "dd/mm/yy",
+		endDate:"now",
+		autoclose: true 
+	  });
+	  
+	  $("#fromdate").datepicker({
+    	  dateFormat: "dd/mm/yy",
+    	  endDate:"now",
+		  autoclose: true,
+          onSelect: function(selected) {
+            $("#todate").datepicker("option","minDate", selected)
+          }
+       });
+	  
+      $("#todate").datepicker({
+    	  dateFormat: "dd/mm/yy",
+    	  endDate:"now",
+		  autoclose: true,
+          onSelect: function(selected) {
+             $("#fromdate").datepicker("option","maxDate", selected)
+          }
+      });
+    
+  
+	$("#asOnDateRadio").prop("checked", true);
+	$('#foriegnRadio').prop("checked",true);
+	dateAsOnDate();
+	autocompleteInitialize('fromCurrency','searchCurrencyCode','CurrencyCode','CurrencyCode','getCurrency');
+	autocompleteInitialize('fromAcc','searchAccountNameWithExp','CustomerId','CustomerId','getAccount');
+	autocompleteInitialize('toCurrency','searchCurrencyCode','CurrencyCode','CurrencyCode','getCurrency');
+	autocompleteInitialize('toAcc','searchAccountName','CustomerId','CustomerId','getAccount');
+	$('.amtValue').autoNumeric('init');
+	$('.amtValue').autoNumeric('update');
+});
+
+function disableFunction(){
+	if($('#fromCurrency').val()=="@session.get("currencyName")"){
+		$('#foriegn').hide();
+		$('#localRadio').prop("checked",true);
+	}else{
+		$('#foriegn').show();
+		$('#foriegnRadio').prop("checked",true);		
+	}
+}  
+
+function getCurrency(data,className){
+	var count=0;
+	for(var k=0;k<=j;k++){
+		if(typeof $('.currencyId_'+k).val() != 'undefined' && $('#currency').val() != "") {
+			 $('.currencyId_'+k).val(data.label);
+			 $('.currencyId_'+k).attr("disabled",true);
+			 $('#temp_currencyId_'+k).remove();                
+	            $('.currencyId_'+k).after("<div id='temp_currencyId_"+k+"' class='search-div aff-dispaly-none'>"
+	            				+"<input type='text' class='name_currencyId_"+k+"' name='accountBalance["+k+"].currency.currencyName' value='"+data.label+"'>"
+	            				+"<input type='text' class='id_currencyId_"+k+"' name='accountBalance["+k+"].currency.currencyId' value='"+data.value+"'>"
+	            				+"</div>");
+				} 
+	}
+	if($('#currency').val() != ""){
+		$('#account').attr("disabled",true);	
+	} 
+}
+
+function getAccount(data,className) {
+	var count=0;
+	 for(var k=0;k<=j;k++){
+		if(typeof $('.accountId_'+k).val() != 'undefined' && $('#account').val() != "" ) {
+			 $('.accountId_'+k).val(data.label);
+			 $('.accountId_'+k).attr("disabled",true);
+			 $('#temp_accountId_'+k).remove();                
+	            $('.accountId_'+k).after("<div id='temp_accountId_"+k+"' class='search-div aff-dispaly-none'>"
+	            				+"<input type='text' class='name_currencyId_"+k+"' name='accountBalance["+k+"].account.accountName' value='"+data.label+"'>"
+	            				+"<input type='text' class='id_currencyId_"+k+"' name='accountBalance["+k+"].account.accountId' value='"+data.value+"'>"
+	            				+"</div>");
+		} 
+	}
+	if($('#account').val() != ""){
+		$('#currency').attr("disabled",true);	
+	}
+}
+
+function dateAsOnDate() {
+	if($('input[name="dateField"]:checked').val()=="asOnDate"){
+		 var dateFormat = $.datepicker.formatDate('dd/mm/yy',new Date());
+		 $("#currentDate").val(dateFormat);
+		 $('#asOnDate').show();
+		 $('.startEndDate').hide();
+		 $('#fromdate').removeAttr('name');
+		 $('#todate').removeAttr('name');
+		 $('#asOndate').attr('name','endDate');
+	 }else {
+		 $('.startEndDate').show();
+		 $('#asOnDate').hide();
+		 $('#fromdate').attr('name', 'startDate');
+		 $('#todate').attr('name','endDate');
+		 $('#asOndate').removeAttr('name');	
+	}
+}
+
+var flag=0;
+function localDrAmt(){
+	if($('input[name="foriegnDr"]:checked').val()=="foriegendrAmt")
+		flag=1;
+	else
+		flag=0;
+}
+
+var value=0;
+function viewLedgerReport(){
+	if($('#fromAcc').val()=="" || $('#fromCurrency').val()==""){
+		errorMessage('transferError');
+		return false;
+	}
+    $("#viewModal").show();
+    localDrAmt();
+	$("#currencyId").val($('.id_fromCurrency').val());
+	$("#toCurrencyId").val($('.id_toCurrency').val());
+	$("#fromAccountId").val($('.id_fromAcc').val());
+	$("#toAccountId").val($('.id_toAcc').val());
+	$("#hiddenStatus").val($('#statusId option:selected').val());
+	$("#flags").val(flag);
+	
+	$.ajax({
+		type: "POST",
+    	url: "/ledgerReportView?date="+flag+"",
+    	dataType: "json",
+    	data:$('#reportForm').serialize(),
+    	dataType: "json",
+    	success: function(data){
+    		debugger
+    		$('#nodata').remove();
+    		$('table tbody tr').remove();
+    		if(data.length>0){
+    			$('#currencyTable tbody tr').remove();
+    			var totalDr=0,totalCr=0,amount=0,opBalance=0,balance=0, bal=0,bal1=0;
+    		    $.each(data, function(key, value){
+    				var balUpdated=0;
+    				if(flag==0){
+    					 debugger
+    					 if(value.length<=2){
+    						 if(value[0]>0){
+    							 if($('input[name="dateField"]:checked').val()=="asOnDate") {
+    								totalDr=totalDr+Number(value[0]);
+ 	    							opBalance=Number(value[0]);
+ 	    					   	 }else {
+ 	    						  	totalDr=totalDr+Number(value[0]-value[1]);
+ 	    							opBalance=Number(value[0]-value[1]);	    						   
+ 	    					     }
+    							 if(opBalance>0){
+	    						 	  $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+	   								 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'></td></tr>");
+    							 }else{
+    								 $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+    										 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue control-label'></td><td class='text-right amtValue balance control-label'></td></tr>");
+    		    						 
+    							 }
+    						}else{
+    							 if($('input[name="dateField"]:checked').val()=="asOnDate") {
+    								 totalCr=totalCr+(Number(value[0])*(-1));
+    								 opBalance=Number(value[0]);
+    							 }else{
+    								 totalCr=totalCr+(Number(value[0])-Number(value[1]));
+    								 totalCr=(Number(totalCr)*(-1))
+    								 opBalance=Number(value[0])-Number(value[1]);
+    							 }
+						 		// totalCr=totalCr+(Number(value[0])-Number(value[1])*(-1));
+						 		if(opBalance>0){
+						 			 $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+			   								 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'></td></tr>");
+		    							
+						 		}else{
+							 		 $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+									 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue control-label'></td><td class='text-right amtValue balance control-label'></td></tr>");
+						 		}
+						 	} 
+    					 }else {	    					 
+	    					 totalDr=totalDr+Number(value[8]);
+		    				 totalCr=totalCr+Number(value[9]);
+		    				if(($('#fromAcc').val()+'-'+$('#fromCurrency').val())==value[5]){
+		    				 	var cur=value[4].split('-');
+				    		    if(cur[1]=='@session.get("currencyName")'){
+				    		    	 var amt=Number(value[8])+Number(value[9]);
+				    			     $(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[4]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(amt,@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[9],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[8],@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+				    		     }else{ 
+				    		    	$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[4]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[15],@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[9],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[8],@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+				    		     }
+			    		    }else if(($('#fromAcc').val()+'-'+$('#fromCurrency').val())==value[4]) {
+				    		    	var cur=value[5].split('-');
+				    		    	if(cur[1]=='@session.get("currencyName")'){
+					    		   		var amt=Number(value[8])+Number(value[9]);
+				    		    		$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><<td class='control-label'>"+value[5]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(amt,@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[9],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[8],@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>"); 
+			    		     		}else{ 
+			    		    			$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[5]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[15],@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[9],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[8],@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+			    		    	 	} 
+			    		     }
+    					}   
+    		   		}else{
+		    			   debugger
+		    			   if(value.length<=2){
+		    				   if(value[0]>0){
+		    					   if($('input[name="dateField"]:checked').val()=="asOnDate") {
+		    						   	totalDr=totalDr+Number(value[0]);
+		    							opBalance=Number(value[0]);
+		    					   } else {
+		    						  	totalDr=totalDr+Number(value[0]-value[1]);
+		    							opBalance=Number(value[0]-value[1]);	    						   
+		    					   }
+		    					   if(opBalance>0){
+			  						 $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+			  						 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'></td></tr>");
+		    					   }else{
+		    						   $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+		  			  						 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue control-label'></td><td class='text-right amtValue balance control-label'></td></tr>");
+		  		    				  
+		    					   }
+		    				}else{
+		    					   if($('input[name="dateField"]:checked').val()=="asOnDate") {
+		    						   totalCr=totalCr+(Number(value[0])*(-1));
+	    							   opBalance=Number(value[0]);
+		    					   }else{
+		    						   totalCr=totalCr+(Number(value[0])-Number(value[1]));
+	    								 totalCr=(Number(totalCr)*(-1))
+	    								 opBalance=Number(value[0])-Number(value[1]);
+		    					   }
+		    					   	// totalCr=totalCr+(Number(value[0])-Number(value[1])*-1);
+		    					   	if(opBalance>0){
+		    					   		$(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+		   			  						 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue balance control-label'></td></tr>");
+		   		    					 
+		    					   	}else{
+		    					   	 $(".ledgerTable").append("<tr class='maintable'><td class='control-label'></td><td class='control-label'></td><td class='control-label'></td><td class='control-label'>Opening Balance"+
+					  						 "</td><td class='text-right amtValue control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValueEx control-label'></td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(opBalance,@session.get("exponent"))+"</td><td class='text-right amtValue control-label'></td><td class='text-right amtValue balance control-label'></td></tr>");
+		    					   	}	
+		    				   }
+		 				  }else{	
+		    		    	 	totalDr=totalDr+Number(value[11]);
+		    				 	totalCr=totalCr+Number(value[10]);
+		    				 	if(($('#fromAcc').val()+'-'+$('#fromCurrency').val())==value[5]) {
+		    					 	var cur=value[4].split('-');
+		 		    		    	if(cur[1]=='@session.get("currencyName")'){
+		 		    		    		var amt=Number(value[9])+Number(value[8]); 
+		    				 			$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[4]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(amt,@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[10],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[11],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+		 		    		    	}else {
+		 		    		    		$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[4]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[15],@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[10],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[11],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+		 		    		    	}
+		 		    		    }else if(($('#fromAcc').val()+'-'+$('#fromCurrency').val())==value[4]) {
+		 		    		    	var cur=value[5].split('-');
+			 		    		    if(cur[1]=='@session.get("currencyName")'){
+			 		    		    	var amt=Number(value[9])+Number(value[8]); 
+		    					 		$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[5]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(amt,@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[10],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[11],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+			 		    		    }else{
+			 		    		    	$(".ledgerTable").append("<tr class='maintable'><td class='control-label'>"+splitDate(value[0])+"</td><td class='control-label'>"+value[1]+"</td><td class='control-label'>"+value[5]+"</td><td class='control-label'>"+value[2]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[15],@session.get("exponent"))+"</td><td class='text-right amtValueEx control-label amtExRate'>"+removeExponentFromAmount(value[6],@session.get("currencyExponent"))+"</td><td class='text-right amtValueEx control-label amtExCnRate'>"+removeExponentFromAmount(value[7],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[10],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[11],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(Number(totalDr)-Number(totalCr),@session.get("exponent"))+"</td></tr>");
+			 		    		    }
+			 		    	   }
+		    			 }
+    		 	  }
+    		  });
+    			  balance=totalDr-totalCr;
+    			  $(".ledgerTable").append("<tr ><td></td><td></td><td></td><td><td></td><td></td></td><td class='text-right control-label'>Total</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(totalCr,'@session.get("exponent")')+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(totalDr,'@session.get("exponent")')+"</td><td></td></tr>");
+    			  if(balance>=0)
+    				   $(".ledgerTable").append("<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td  class='text-right control-label'>Balance</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(balance , '@session.get("exponent")')+"</td><td><td></td></tr>");
+    				else
+    				   $(".ledgerTable").append("<tr><td></td><td></td><td><td><td><td></td></td></td></td><td  class='text-right control-label'>Balance</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(balance , '@session.get("exponent")')+"</td><td></td><td></tr>"); 
+    			  	
+    			  $('.amtValue').autoNumeric('init');
+    			  $('.amtValue').autoNumeric('update');
+    				
+    			  $('.amtValueEx').autoNumeric('init',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+    			  $('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+    			  $("#ledgerSummary > tbody  > tr").each(function () {
+    				 $(this).find('.amtExRate').text(parseFloat($(this).find('.amtExRate').text()));
+    				 $(this).find('.amtExCnRate').text(parseFloat($(this).find('.amtExCnRate').text()));
+    			  });
+    		}else{
+    			$('#nodata').remove();
+				$('.ledgerTable').append('<tr><td id="nodata" colspan="9">No data available</td></tr>');
+			}
+    	}
+	
+	});		
+}
+	
+function submitReport() {
+	if($('#fromAcc').val()=="" || $('#fromCurrency').val()==""){
+		errorMessage('transferError');
+		return false;
+	}
+	localDrAmt();
+	$("#currencyId").val($('.id_fromCurrency').val());
+	$("#toCurrencyId").val($('.id_toCurrency').val());
+    $("#fromAccountId").val($('.id_fromAcc').val());
+    $("#toAccountId").val($('.id_toAcc').val());
+	$('#asOnDate').val($('.id_ asdate'));
+	$("#fromAccountName").val($('.name_fromAcc').val());
+	$("#toCurrencyCode").val($('.name_fromCurrency').val());
+	$("#hiddenStatus").val($('#statusId option:selected').val());
+	$("#flags").val(flag);
+	$('#reportForm').attr('action','@controllers.routes.ReportController.downloadReport()?date='+flag+'');
+	$('#reportForm').submit();
+}
+
+function errorMessage(id) {
+	$('.'+id).show();
+	window.setTimeout(function() {
+		$('.'+id).hide();
+	}, 3000);
+}
+
+function modalClose(){
+    $("#viewModal").hide();
+}
+
+function refresh(){
+	location.reload();
+}
+
+</script>
+}

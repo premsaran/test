@@ -1,0 +1,400 @@
+
+@views.html.main(){
+<div class="row">
+   <div class="col-md-12">
+      <ol class="breadcrumb breadcrumb-txt-size">
+         <li><a href="#">Home</a></li>
+         <li class="active"><a href="#">Profit And Loss Report</a></li>
+      </ol>
+   </div>
+</div>
+
+<div class="col-md-12">
+<form id="reportForm" class="form-horizontal" action="@controllers.routes.ReportController.downloadReport()" method="post">
+<div class="form-group">
+		<input type="hidden" id="reportId" name="reportId" value="6005">
+    <div id="debitorcredit">
+  
+                <label class="col-lg-2 right-align-text control-label "> As On Date</label>
+                   <div class="col-lg-1">
+                      <input type="radio" class="creditDebitCheckbox" name="dateField" onclick="dateAsOnDate()" value="asOnDate" id="asOnDateRadio" data-rule-required="true"/>
+                   </div>
+                   <div class="" id="selectDate">
+                      <label class="col-lg-3 right-align-text control-label ">Select Date</label>
+                      <div class="col-lg-2">
+                         <input type="radio" class="creditDebitCheckbox" name="dateField" onclick="dateAsOnDate()" value="date" id="dateRadio" data-rule-required="true"/>
+                      </div>
+                 </div>
+           </div>
+           </div>
+           <div class="row margin-top-5px"></div>
+       		<div class="row margin-top-5px">
+			   <div class="form-group startEndDate" style="display:none">
+					<div style="display: block">
+						<label class="col-lg-2 right-align-text control-label ">From Date</label>
+						<div class="col-md-2">	
+							<input type="text"  class="form-control" placeholder="Enter From  Date" name="startDate"  data-date-format="dd/mm/yyyy" id="fromdate" autocomplete="off">
+						</div>
+					</div>
+					<div style="display: block">
+						<label class="col-lg-2 right-align-text control-label ">To Date</label>
+						<div class="col-md-2">
+							<input type="text"  class="form-control" placeholder="Enter To Date" name="endDate" data-date-format="dd/mm/yyyy" id="todate" autocomplete="off">
+						</div>
+					</div>
+			       </div>
+			    <div class="form-group" id="asOnDate">
+                        <label class="col-lg-2 right-align-text control-label "> Date</label>
+                        <div class="col-md-2">
+                      <input type="text"  class="form-control asdate" placeholder="Enter To Date" name="asonDate" data-date-format="dd/mm/yyyy" id="asOndate" autocomplete="off">
+					 </div>
+                 </div>
+		   </div>
+		   </form>
+		   <div class="row margin-top-5px"></div>
+	 <div class="row margin-top-5px">
+      <label class="col-lg-2 right-align-text control-label ">Report Type</label>
+      <div class="col-lg-2">
+      	<select class="form-control reportType" onchange="changeReportType()" onclick="reportsType()">
+      		<option value='0' selected="selected">--All--</option>
+      	@*	<option value='1' >Customer Wise Profit&Loss</option>*@
+      		<option value='2'>Currency Wise Profit&Loss</option>
+      	</select>
+      </div>
+      <label class="col-lg-2 right-align-text control-label ">FileType</label>
+        <div class="col-lg-2" id="documentType">
+       <select class="form-control documentType">
+       <option selected="selected">Pdf</option>
+      </select>
+      </div>
+      </div>
+      <div class="row margin-top-5px"></div>
+      <div class="row margin-top-5px">
+		   <div class="form-group" >
+		   <div style="display: none" id="customerDisplay">
+            <label class="col-md-2 control-label  right-align-text">Customer Name <span class="aff-color-red" style="position: absolute !important;">&nbsp;*</span></label>
+            <div class="col-md-2">	
+               <input type="text"  class="form-control fromAcc" name="searchVendor" id="fromAcc" placeholder="Search Account Name">
+               <input type="hidden" id="fromAccountId" name="fromAccountId">
+               <input type="hidden" id="fromAccountName" name="accountName">
+               <span class="aff-color-red transferError" style="display: none">This Field Is Required!</span>
+            </div>
+          </div>
+          <div style="display: none" id="currencyDisplay">
+         	<label class="col-md-2 control-label  right-align-text">Currency Name<span class="aff-color-red" style="position: absolute !important;">&nbsp;*</span></label>
+            <div class="col-md-2">	
+               <input type="text" class="form-control fromCurrency" name="searchCurrency"  id="fromCurrency" placeholder="Search Currency Name">
+                <input type="hidden" id="currencyId" name="currencyId">
+                <input type="hidden" id="toCurrencyCode" name="currencyCode">
+                <span class="aff-color-red transferError" style="display: none">This Field Is Required!</span>
+            </div>
+            </div>
+         </div>
+      </div>
+      
+      </div>
+      <br><br>
+      	<div align="center" id="finalvalues">
+      		<button type="button" class="btn btn-success" onclick="viewLedgerReport()"><i class="fa fa-eye"></i> View</button>	
+        	<button class="btn btn-primary submit"  onclick="submitReport()" type="button"><i class="fa fa-download"></i> Download</button>
+        	
+      </div>
+    <div class="col-md-4" id="viewModal" style="margin-left: 20%;">
+          <button type="button" class="close" onclick="modalClose()">&times;</button>
+          <h5 class="modal-title control-label" align="center">Profit And Loss Report</h5>
+          <br>
+          <table class="table table-hover text-centered" id="ledgerSummary">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+								 <th><i class="fa fa-money text-right"></i> Debit Amount</th>
+								 <th><i class="fa fa-money text-right"></i> Credit Amount</th>
+                              </tr>
+                           </thead>
+                           <tbody class="ledgerTable">                 
+						   </tbody>
+                        </table>
+                        <div class="form-group totals">
+                          <h4 class="col-md-2 quantity  text-right control-label" id="totalName"></h4>
+                        	<h4 class=" quantity col-md-4 total control-label" id="total"></h4>
+                        	<h4 class="totalAmt quantity col-md-2 control-label" id="crdrAmt"></h4>
+                         </div>
+         <br><br><br><br><br>
+         <div align="center">
+         <button type="button" class="btn btn-danger" onclick="modalClose()">&times; Close</button>               
+        </div>
+        </div>
+        
+      <div class="col-md-12" id="viewModalCurrency" style="display:none">
+          <button type="button" class="close" onclick="modalClose()">&times;</button>
+          <h5 class="modal-title control-label" align="center">Profit And Loss Report </h5>
+          <br>
+        	  <table class="table table-hover text-centered" id="profitandloss">
+		        	<thead style="text-align: center;">
+                     	 <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+	                         <th style="text-align: left;">To Account</th>
+	                         <th style="text-align: right;">Amount</th>
+							 <th style="text-align: right;">Rate</th>
+							 <th class='text-right' style="text-align: right;">Debit Amount</th>
+							 <th class='text-right' style="text-align: right;">Credit Amount</th>
+		                 </tr>
+                   </thead>
+                   <tbody class="profitandloss">
+				   </tbody>
+              </table>
+         <div align="center">
+         <button type="button" class="btn btn-danger" onclick="modalClose()">&times; Close</button>               
+        </div>
+        </div>
+        
+</form>
+@views.html.modal() @views.html.TransferReportModal()
+@views.html.commonJs()
+<script>
+var total=0;
+$(function () {
+	$.extend($.fn.autoNumeric.defaults,
+			{
+				aSep: ',',              
+				aDec: '.' ,
+		        mDec: '@session.get("exponent")',
+		        dGroup: '3',	
+		        vMin: -99999999999999.9999,
+		        vMax: 99999999999999.9999
+			}); 
+	
+	 $('#viewModal').hide();
+	    var dateFormat = $.datepicker.formatDate('dd/mm/yy', new Date());
+	    $('#asOndate').val(dateFormat);
+	    $('#fromdate').val(dateFormat);
+	    $('#todate').val(dateFormat);
+	            /*$("#asOndate").datepicker('setDate',new Date()); */
+	  $("#asOndate").datepicker({ dateFormat: "dd/mm/yy",
+		  endDate:"now",
+		autoclose: true });
+
+	 $("#fromdate").datepicker({
+    	  dateFormat: "dd/mm/yy",
+    	  endDate:"now",
+		  autoclose: true,
+          onSelect: function(selected) {
+            $("#todate").datepicker("option","minDate", selected)
+          }
+       });
+      $("#todate").datepicker({
+    	  dateFormat: "dd/mm/yy",
+    	  endDate:"now",
+		  autoclose: true,
+          onSelect: function(selected) {
+             $("#fromdate").datepicker("option","maxDate", selected)
+          }
+      });
+
+  $(".CurrencyDate").datepicker({
+dateFormat: "dd/mm/yy",maxDate: 0,
+});  
+ var dateFormat = $.datepicker.formatDate('dd/mm/yy', new Date());
+$('.CurrencyDate').val(dateFormat);
+$("#asOnDateRadio").prop("checked", true);
+dateAsOnDate();
+$('.amtValue').autoNumeric('init');
+$('.amtValue').autoNumeric('update');
+
+$('.amtValueEx').autoNumeric('init');
+$('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+
+autocompleteInitialize('fromAcc','searchAccountNameWithExp','CustomerId','CustomerId','getAccount');
+autocompleteInitialize('fromCurrency','searchCurrencyCode','CurrencyCode','CurrencyCode','getCurrency');
+ });
+
+function modalClose(){
+    $("#viewModal").hide();
+    $("#viewModalCurrency").hide();
+}
+
+function changeReportType() {
+	if($('.reportType :selected').val() == '1') {
+		$('#customerDisplay').show();
+		$('#currencyDisplay').hide();
+	} else if($('.reportType :selected').val() == '2') {
+		$('#customerDisplay').hide();
+		$('#currencyDisplay').show();
+		$('#reportId').val('6006')
+	} else {
+		$('#customerDisplay').hide();
+		$('#currencyDisplay').hide();
+	}
+}
+
+
+function refresh(){
+	location.reload();
+}
+var flag=0;
+function dateAsOnDate() {
+	if($('input[name="dateField"]:checked').val()=="asOnDate"){
+		flag=0;
+	 var dateFormat = $.datepicker.formatDate('dd/mm/yy',new Date());
+	 $("#currentDate").val(dateFormat);
+	 $('#asOnDate').show();
+	 $('.startEndDate').hide();
+	 $('#fromdate').removeAttr('name');
+	 $('#crdrAmt').hide();
+	 
+	 $('#totalName').show();
+	 $('#total').show();
+	 $('.totals').hide();
+	 $('#ledgerSummary').find('td').hide();
+	 
+	 } else {
+		flag=1;
+		$('.startEndDate').show();
+		$('#asOnDate').hide();
+		$('#fromdate').attr('name', 'startDate');
+		 $('.ledgerTable').find('tr').hide();
+		 $('.totals').hide();
+		 
+	}
+}
+function errorMessage(id) {
+	$('.'+id).show();
+	window.setTimeout(function() {
+		$('.'+id).hide();
+	}, 3000);
+}
+
+var flags=0;
+function reportsType(){
+	flags=1
+	if($('.reportType option:selected').val() == '2'){	
+	}else{
+		flags=0
+	}
+}
+     var from="",to="",currency="",accName="";
+     var flags=0;
+	function viewLedgerReport(){
+		if($('.reportType option:selected').val() == '0') {
+			$('#viewModalCurrency').hide(); 
+			$('#viewModal').show(); 
+			$('#ledgerSummary').find('td').hide();
+			$('.totals').show(); 	
+		}else{
+			$('#viewModal').hide(); 
+			$('#viewModalCurrency').show(); 
+			$('#profitandloss').find('td').hide();
+			
+		}
+		debugger 
+		reportsType();
+		if($('input[name="dateField"]:checked').val()=="asOnDate"){
+		     var asOnDate = $('#asOndate').datepicker('getDate');
+			  to = $.datepicker.formatDate('dd-mm-yy',asOnDate);
+			  from="";
+		}else{
+		    var startDate = $('#fromdate').datepicker('getDate');
+			from= $.datepicker.formatDate('dd-mm-yy',startDate);
+			var endDate=$('#todate').datepicker('getDate');
+			to=$.datepicker.formatDate('dd-mm-yy',endDate);
+		} 
+		if($("#fromCurrency").is(":visible") && $('#fromCurrency').val()==""){
+			$('.totals').hide();
+			errorMessage('transferError');
+			return false;
+		}else
+			currency=$(".id_fromCurrency").val();
+		if($('#fromAcc').is(":visible") && $('#fromAcc').val()==""){
+			$('.totals').hide();
+			errorMessage('transferError');
+			return false;
+		}else
+			accName=$('.id_fromAcc').val();	
+		$.ajax({
+			type: "GET",
+	    	url: "/viewProfitAndLoss?flag="+flag+"&from="+from+"&to="+to+"&currency="+currency+"&accName="+accName+"&reportType="+$('.reportType option:selected').val(),
+	    	dataType: "json",
+	    	success: function(data){
+	    		if(data.length>0){
+	    		var totalBal=0;
+	    		var crDrAmt=0;
+	    		var totaldebit=0,totalcredit=0;
+	    		var totalDr=0,totalCr=0;
+	    		$.each(data, function(key, value){
+	    			
+	    		if(flags==0){
+	    			 totalBal=value[0]-value[1];
+	    			 crDrAmt=value[0]-value[1]; 	 
+	    			$('.ledgerTable').append('<tr id="mintable"><td class="quantity control-label">'+removeExponentFromAmount(value[1],'@session.get("exponent")')+'</td><td class="quantity control-label">'+removeExponentFromAmount(value[0],'@session.get("exponent")')+'</td></tr>');
+	    			$('.quantity').autoNumeric('init');
+	    			if(flag==1){
+	    				$('#totalName').text('');
+	    				$('#total').text('');
+	    				$('#totalName').text('Total');
+	    				$('.total').autoNumeric('init');
+		    			$('.total').autoNumeric('set',removeExponentFromAmount(crDrAmt,'@session.get("exponent")'));
+		    			return;
+	    			}  
+	    			if(totalBal>=0){
+	    			$('#totalName').text('');
+	    			$('#total').text('');
+	    			$('#totalName').text('Profit');
+	    			$('.total').autoNumeric('init');
+	    			$('.total').autoNumeric('set',removeExponentFromAmount(totalBal,'@session.get("exponent")'));
+	    			}else{
+	    			$('#totalName').text('');
+    				$('#total').text('');
+	    			$('#totalName').text('Loss');
+	    			$('.total').autoNumeric('init');
+	    			$('.total').autoNumeric('set',removeExponentFromAmount(totalBal,'@session.get("exponent")'));
+		    		 
+	    		 }
+	    		}
+	    		else{
+	    		
+	    			totalDr=totalDr+value[5],
+	    			totalCr=totalCr+value[4];
+	    			
+    				 $(".profitandloss").append("<tr class='maintable'><td class='control-label' align='left'>"+value[1]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[0],@session.get("exponent"))+"</td><td class='text-right amtValue control-label '>"+removeExponentFromAmount(value[2],@session.get("currencyExponent"))+"</td><td class='text-right amtValue control-label '>"+removeExponentFromAmount(value[5],@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[4],@session.get("exponent"))+"</td></tr>");	
+    				 $('.amtValue').autoNumeric('init');
+ 	    			$('.amtValue').autoNumeric('update');
+	    		}		
+	            });
+	    		var balance = totalCr-totalDr;
+	    		 $(".profitandloss").append("<tr ><td></td><td></td><td class='text-right control-label'>Total</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(totalDr,@session.get("exponent"))+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(totalCr,@session.get("exponent"))+"</td></tr>");
+	    		 if(balance>0)
+	    			 $(".profitandloss").append("<tr ><td></td><td></td><td></td><td class='text-right control-label'>Profit</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(balance,@session.get("exponent"))+"</td></tr>");
+	    		 else	
+	    			 $(".profitandloss").append("<tr ><td></td><td></td><td class='text-right control-label'>Loss</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(balance,@session.get("exponent"))+"</td><td></td></tr>");
+	    		 	$('.amtValue').autoNumeric('init');
+	    			$('.amtValue').autoNumeric('update');	
+	    	}else{
+	    		if(flags==0){
+					$('.ledgerTable').append('<tr><td class="control-label" id="nodata " colspan="9">No data available</td></tr>');
+	    		}
+	    		else{
+	    			$('.profitandloss').append('<tr><td class="control-label" id="nodata " colspan="9">No data available</td></tr>');
+	    		}
+	    	}
+	    	}
+			});		
+		}	
+
+   function submitReport() {
+	$('#asOnDate').val($('.id_ asdate'));
+		if($("#fromCurrency").is(":visible") && $('#fromCurrency').val()==""){
+			errorMessage('transferError');
+			return false;
+		}else
+			currency=$(".id_fromCurrency").val();
+		if($('#fromAcc').is(":visible") && $('#fromAcc').val()==""){
+			errorMessage('transferError');
+			return false;
+		}else
+			accName=$('.id_fromAcc').val();	
+		
+   			$('#reportForm').attr('action','@controllers.routes.ReportController.downloadReport()?flag='+flag+"&flags="+flags+"&currency="+currency+"&accName="+accName+"&reportType="+$('.reportType option:selected').val()+''); 
+	 	   $('#reportForm').submit();
+		
+}
+
+</script>
+}

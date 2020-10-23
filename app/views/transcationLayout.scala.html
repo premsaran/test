@@ -1,0 +1,852 @@
+@(currencyList:List[entity.Currency],transcation:entity.Transcation,check:String,accountList:List[entity.Account])
+<div class="grid-stack" id="">
+<div class="grid-stack-item" data-gs-x="6" data-gs-y="0" data-gs-width="6" data-gs-height="6">
+<div class="grid-stack-item-content" style="background:  white;box-shadow: 1px 1px 1px 1px;">
+<form class="form-horizontal" id="orderFormValid" action="@controllers.routes.TransferController.createTransfer()" method="post">
+	<input type="hidden" value="100001" name="transcationStatus.statusId">
+            <br>
+            <div class="row" align="center">
+               <div class="form-group dateDIv">
+                  <label class="control-label col-md-3 right-align-text" >Date</label>
+                  <div class="col-md-2">
+                     <input type="text" id="date" name="" class="form-control" style="width: 131% !important;" data-date-format="dd/mm/yyyy" readonly>
+                     <input type="hidden" id="dateHidden" name="transcationDate">
+                  </div>
+                  <label class="control-label col-md-2 right-align-text">Multiply</label>
+                  <div class="col-md-1" >
+                     <input type="radio" checked name="test1" id="multiply"
+                        onclick="multiplyFun()">
+                  </div>
+                  <label class="control-label col-md-2 right-align-text">Divide</label>
+                  <div class="col-md-1">
+                     <input type="radio" name="test1" id="divide" onclick="divideFun()">
+                  </div>
+                  <input type="hidden" id="multiplyDivideFlag"
+                     name="multiplyDivideFlag">
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-3"></div>
+               <div class="col-md-4">
+                  <span class="aff-color-red transferError" style="display: none">Check Input Amount</span> 
+                  <span class="aff-color-red accountError" style="display: none">Empty Account Not Allowed</span> 
+                     <span class="aff-color-red accountError1" style="display: none">Choose Different Account Or Currency</span> 
+                     <span class="aff-color-red currencyError1" style="display: none">Choose Different Currency</span> 
+                  <span class="aff-color-red currencyError" style="display: none">Choose Currency </span>
+               </div>
+               <div class="col-md-4">
+                  <label class="control-label">Convert Currency</label>
+               </div>
+            </div>
+            
+             <div class="row">
+               <div class="form-group">
+                  <label class="control-label col-md-3 right-align-text">Debit</label>
+                  <div class="col-md-4">
+                  	<select class="form-control fromAccount" name="fromAccount.accountId" id="fromAccount" onchange="changeCurrency(this,1,0)">
+                        <option value="">--select--</option>
+                        @for(account <- accountList){
+                        <option value="@account.getAccountId()">@account.getAccountName()</option>
+                        }
+                     </select>
+                     <!-- <input type="text" class="form-control fromAccount" id="fromAccount"
+                        name="test" placeholder="Search Account" onfocusout="resetFromTo(this)"> -->
+                  </div>
+                  <div class="col-md-4">
+                     <select class="form-control" onchange="setLabel(1,1)"
+                        id="fromCurrency">
+                        <option value="">--select--</option>
+                        @for(currency <- currencyList){
+                        <option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>
+                        }
+                        <option value='@session.get("currencyId")'></option>
+                     </select>
+                     <input type="hidden" id="hiddenFromCurrency"
+                        name="fromCurrency.currencyId">
+                  </div>
+                  <div class="col-md-2 localAmt" style="display:none">
+					<input type="text" id="fromLocalAmount"
+						class="form-control text-right amtValue" disabled> 
+						<input type="hidden" id="hiddenFromLocalAmount" name="fromLocalAmount">
+				</div>
+				
+               </div>
+            </div>
+            
+            <div class="row">
+               <div class="form-group">
+                  <label class="control-label col-md-3 right-align-text">Credit</label>
+                  <div class="col-md-4">
+                  	<select class="form-control toAccount" name="toAccount.accountId" id="toAccount" onchange="changeCurrency(this,2,0)">
+                        <option value="">--select--</option>
+                        @for(account <-
+                        accountList){
+                        <option value="@account.getAccountId()">@account.getAccountName()</option>
+                        }
+                     </select>
+                     <!-- <input type="text" class="form-control toAccount" name="test2" id="toAccount"
+                        placeholder="Search Account" onfocusout="resetFromTo(this)"> --> 
+                  </div>
+                  <div class="col-md-4">
+                     <select class="form-control" onchange="setLabel(1,2)" id="toCurrency">
+                        <option value="">--select--</option>
+                        @for(currency <-
+                        currencyList){
+                        <option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>
+                        }
+                        <option value='@session.get("currencyId")'></option>
+                     </select>
+                     <input type="hidden" id="hiddenToCurrency"
+                        name="toCurrency.currencyId">
+                         <input type="hidden" id="tenantId"
+                        name="tenant.tenantId" value="@session.get("tenantId")">
+                        
+                  </div>
+                  <div class="col-md-2 localAmt" style="display:none">
+					<input type="text" id="toLocalAmount"
+						class="form-control text-right amtValue" disabled> <input
+						type="hidden" id="hiddenToLocalAmount" name="toLocalAmount">
+				</div>
+               </div>
+            </div>
+                 
+            <div class="row">
+               <div class="form-group">
+                  <label class="control-label col-md-3 right-align-text">Amount<span class="aff-color-red" style="position: absolute !important;">&nbsp;*</span>
+                  </label>
+                  <div class="col-md-4">
+                     <input type="text"
+                        class="form-control text-right amtValue transferAmt" name="test" onfocus="emptyField(this)" onfocusout="reintialize(this)"
+                        onkeyup="calcLocalTotal(this)" data-rule-required="true"
+                        data-msg-required="Enter Amount"> <input type="hidden"
+                        id="hiddeninputAmount" name="inputAmount">
+                  </div>
+                  <div class="col-md-4 hideCurrency" style="display: none">
+                     <select class="form-control" onchange="setLabel(2)"
+                        id="currencyVal">
+                     </select> <input type="hidden" id="hiddenCurrencyVal">
+                     	<span class="aff-color-red givenCurrencyError" style="display: none">Select Given Currency </span>
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-4"></div>
+               <div class="col-md-4">
+                  <span class="aff-color-red exchangeError1" style="display: none">Check
+                  Exchange Rate </span> <label class="control-label label1"></label>
+               </div>
+               <div class="col-md-4">
+                  <label class="control-label label2"></label>
+               </div>
+            </div>
+            <div class="row">
+               <div class="form-group">
+                  <label
+                     class="control-label col-md-3 right-align-text hideRate hhhRate">Rate</label>
+                  <div class="col-md-4 toCur1">
+                     <input type="text" id="exchangeRate1"
+                        class="form-control text-right amtValueEx" onfocus="emptyField(this)" onfocusout="reintialize(this)"
+                        onkeyup="calcLocalTotal(this,true)">
+                  </div>
+                  <div class="col-md-4 toCur2" style="display: none">
+                     <input type="text" id="exchangeRate2"
+                        class="form-control text-right amtValueEx" onfocus="emptyField(this)" onfocusout="reintialize(this)"
+                        onkeyup="calcLocalTotal(this,true)">
+                  </div>
+               </div>
+            </div>
+            <div class="row">
+               <div class="col-md-8"></div>
+               <div class="col-md-4"></div>
+            </div>
+            <input type="hidden" id="hiddenExchangeRate1" name="exchangeRate1">
+            <input type="hidden" id="hiddenExchangeRate2" name="exchangeRate2">
+            <input type="hidden" id="exponent" name="exponent" value="@session.get("exponent")"> 
+            <input type="hidden" id="userId" name="user.userId" value="@session.get("userId")">
+             <input type="hidden" id="tenantId" name="tenant.tenantId" value="@session.get("tenantId")">
+            <div class="row">
+               <div class="form-group">
+                  <div style="display: block">
+                     <label class="control-label col-md-3 right-align-text">Description
+                     <span class="aff-color-red" style="position: absolute !important;">&nbsp;*</span>
+                     </label>
+                     <div class="col-md-7">
+                     <textarea class="form-control textDescription" style="height:100%;" rows="3" autocomplete="off"  placeholder="Enter To Descripton" class="form-control error" data-rule-required="true" 
+                       data-msg-required="This Field Is Required" data-rule-maxlength="250" data-msg-maxlength="Maximum Length 100 character" 
+                       data-rule-minlength="3" data-msg-minlength="Minimum Length is 3 character" onfocusin="focusDescription()" ></textarea>
+                        <input type="hidden" id="description" name="comments" class="">
+                        <span class="aff-color-red descriptionError" style="display: none">Enter Description</span>
+                         <span class="aff-color-red descriptionError1" style="display: none">Minimum Length is 3 Maximum Length 100</span>
+                        </div>
+                  </div>
+               </div>
+            </div>
+            <div align="center">
+               <button class="btn btn-primary submit viewBtn" type="button" onclick="validTransfers()"><i class="fa fa-check"></i> Submit</button>
+               <button type="button" onclick="alertModal('reset','reset')" class="btn btn-dark resetBtn"><i class="fa fa-refresh"></i> Reset</button>
+               <button class="btn btn-danger closeBtn" type="button" onclick="alertModal('cancel','cancel')"><i class="fa fa-times"></i> Cancel</button>
+            </div>
+            <div class="row" style="display:none" id="details">
+               <label class="control-label col-md-2 text-left"></label><label class="control-label col-md-10 text-left" style="color: green !important;"><b class="col-md-12 text-left" id="createdBy"></b></label>
+               <label class="control-label col-md-2 text-left"></label><label class="control-label col-md-10 text-left" style="color: red !important;"><b class="col-md-12 text-left" id="deletedBy"></b></label>
+               <label class="control-label col-md-2 text-left"></label><label class="control-label col-md-10 text-left" style="color: green !important;"><b class="col-md-12 text-left" id="recalledBy"></b></label>
+            </div>
+      </form>
+      </div>
+   </div>
+</div>
+
+<form id="editForm" method="post">
+<input type="hidden" id="editTransId" name="primaryKey">
+<input type="hidden" id="editTransDate" name="startDate">
+<input type="hidden" id="editTransComments" name="value1">
+<input type="hidden" id="tenantId" name="tenant.tenantId" value="@session.get("tenantId")">
+</form>
+@views.html.alertModal()
+<script>
+var model="";
+$(function(){
+	model = new jBox('Modal', { 
+		animation: 'move',
+	    width: 450,
+	    title: 'Balance',
+	    position: { x: 505, y: 0 },
+	    overlay: false,
+	    createOnInit: true,
+	    content: 'Drag me around by clicking anywhere',
+	    draggable: true,
+	    /* autoClose: 10000, */
+	    repositionOnOpen: false,
+	    repositionOnContent: false
+	  });
+	$('#jBox1').find('.jBox-content').html('<div><b id="debit"></b></div><div><b id="credit"></b></div>');
+	$('#jBox1').css('color','black');
+	$('#jBox1').css('font-size','15px');
+	$('.jBox-title').css('padding','6px 19px');
+	$('.jBox-title').css('font-weight','600');
+	 $("#date").datepicker({
+		 dateFormat: "dd/mm/yy",
+		 endDate : new Date(),
+		 autoclose :true
+		 }).datepicker('setDate','now');
+		$.extend($.fn.autoNumeric.defaults,
+			  {
+					aSep: ',',              
+					aDec: '.' ,
+			        mDec: '@session.get("exponent")',
+			        dGroup: '3',	
+			        vMin: -99999999999999.9999,
+			        vMax: 99999999999999.9999
+
+			}); 
+	
+	$('.amtValue').autoNumeric('init');
+	$('.tableAmtValue').autoNumeric('init');
+	$('.tableAmtValue').autoNumeric('update');
+	$('.amtValue').autoNumeric('set',0);
+	$('.amtValueEx').autoNumeric('init');
+	$('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+	$('.amtValueEx').autoNumeric('set',0);
+	$("form").attr('autocomplete', 'off');
+	$("#fromCurrency option:last-child").css('display','none');
+	$("#toCurrency option:last-child").css('display','none');
+	
+	autocompleteInitialize('fromAccount','searchAccountNameWithExp','fromAccount.accountName','fromAccount.accountId','getFromAccount');
+	autocompleteInitialize('toAccount','searchAccountNameWithExp','toAccount.accountName','toAccount.accountId','getToAccount');
+	
+	@if(transcation!=null){	
+		setEditOnloadValues();
+	}
+});
+
+function focusDescription(){
+	calcLocalTotal("",true);
+}
+
+function setCurrency() {
+	var option="";
+	option = option + '<option value="">--select--</option>';
+	if($('#fromCurrency option:selected').val() !="" && $('#toCurrency option:selected').val() !=""){
+		
+		@for(currency <- currencyList) {
+			if('@currency.getCurrencyId()' == $('#fromCurrency option:selected').val() || '@currency.getCurrencyId()' == $('#toCurrency option:selected').val()){
+				option = option + '<option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>';	
+			}
+     	}	
+	}
+	$('#currencyVal').html('');
+	option = option + '<option value="@session.get("currencyId")"></option>';
+	$('#currencyVal').append(option);
+	if($('#fromCurrency option:selected').text()=="" || $('#toCurrency option:selected').text()==""){
+		$("#currencyVal option:last-child").prop('selected',true).change();
+		$('#currencyVal option[value="@session.get("currencyId")"]:first').css('display','none');
+	}
+	else{
+		$("#currencyVal option:last-child").css('display','none');
+	}
+}
+
+$('.textDescription').keyup(function() {
+	$(this).val($(this).val().toUpperCase());
+});
+
+
+
+function validTransfers(){
+	if(Number($('.transferAmt').autoNumeric('get')) == 0){
+		errorMessage('transferError');
+		return false;
+	}
+	if($('#fromAccount').val() =="" || $('#toAccount').val() ==""){
+		errorMessage('accountError');
+		return false;
+	}
+	
+	
+	if($('#fromCurrency option:selected').val() =="" || $('#toCurrency option:selected').val() ==""){
+		errorMessage('currencyError');
+		return false;
+	}
+	 if($('#fromAccount').val()==$('#toAccount').val() && $('#fromCurrency').val()==$('#toCurrency').val()){
+			errorMessage('accountError1');
+			return false;
+		} 
+	 
+	if($('#fromCurrency option:selected').val()!=$('#toCurrency option:selected').val()&&$('#currencyVal option:selected').val()==""){
+			errorMessage('givenCurrencyError');
+			return false;
+	 } 
+	if($('#fromCurrency').val() != "" && $('#toCurrency').val() != "" && $('#fromCurrency').val() != $('#toCurrency').val()){
+		if(Number($('#exchangeRate1').autoNumeric('get')) == 0){
+			errorMessage('exchangeError1');
+			return false;
+		}
+	}
+		
+	if($('.textDescription').val() == "") {
+		errorMessage('descriptionError');
+		return false;
+	}
+	if($('.textDescription').val().length <3) {
+		errorMessage('descriptionError1');
+		return false;
+	}
+	 alertModal('submitTransfers','submit');
+}
+
+
+function submitTransfers()
+{
+	@if(check=="2"){
+		$('#editForm :input').removeAttr('disabled');
+    	$('#editTransComments').val($('.textDescription').val());
+    	var time = new Date();
+    	var getTime = time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
+        var date = $('#date').datepicker('getDate');
+        $('#editTransDate').val($.datepicker.formatDate('yy-mm-dd', date)+" "+getTime);
+        $('#editForm').attr('action','/updateTransfer');
+    	$('#editForm').submit();
+    	return;
+    }
+	
+	$('#description').val($('.textDescription').val());	
+	
+	if($('.id_toAccount').val() !="")
+		$('#hiddenToAccount').val($('.id_toAccount').val());
+	
+	if($('.id_fromAccount').val() !="")
+		$('#hiddenFromAccount').val($('.id_fromAccount').val());
+	
+	if($('#fromCurrency option:selected').val() !=""){
+		$('#hiddenFromCurrency').val($('#fromCurrency option:selected').val());	
+	}
+	if($('#toCurrency option:selected').val() !=""){
+		$('#hiddenToCurrency').val($('#toCurrency option:selected').val());
+	}
+	
+	$('#hiddeninputAmount').val(addExponentToAmount(Number($('.transferAmt').autoNumeric('get')),@session.get("exponent")));
+	if($('#multiply').is(':checked'))
+		$('#multiplyDivideFlag').val(1);
+	else
+		$('#multiplyDivideFlag').val(2);
+
+	$('#hiddenToLocalAmount').val(addExponentToAmount(Number($('#toLocalAmount').autoNumeric('get')),@session.get("exponent")));
+	$('#hiddenToLocalAmount').val(addExponentToAmount(Number($('#toLocalAmount').autoNumeric('get')),@session.get("exponent")));
+	$('#hiddenFromLocalAmount').val(addExponentToAmount(Number($('#fromLocalAmount').autoNumeric('get')),@session.get("exponent")));
+	$('#hiddenExchangeRate1').val(addExponentToAmount(Number($('#exchangeRate1').autoNumeric('get')),@session.get("currencyExponent")));
+	$('#hiddenExchangeRate2').val(addExponentToAmount(Number($('#exchangeRate2').autoNumeric('get')),@session.get("currencyExponent")));
+	
+	if($('#currencyVal option:selected').val() !=""){
+		$('#hiddenCurrencyVal').attr("name","currency.currencyId");
+		$('#hiddenCurrencyVal').val($('#currencyVal option:selected').val());
+	}
+	
+	var time = new Date();
+	var getTime = time.getHours()+":"+time.getMinutes()+":"+time.getSeconds();
+    var date = $('#date').datepicker('getDate');
+    $('#dateHidden').val($.datepicker.formatDate('yy-mm-dd', date)+" "+getTime);
+    $('#orderFormValid').submit();	
+}
+
+var exchangeRate1Value=0;
+var exchangeRate2Value=0;
+function setLabel(value,flag) {
+	
+	exchangeRate1Value=0;
+	exchangeRate2Value=0;
+	
+	if(value==1){
+		setCurrency();
+	}
+	if(flag==1){
+		changeCurrency("",1,1);
+	}else{
+		changeCurrency("",2,2);
+	}
+	$('#exchangeRate1').autoNumeric('set',0);
+	$('#exchangeRate2').autoNumeric('set',0);
+	
+	 if($('#fromCurrency').val() == "@session.get("currencyId")" && $('#toCurrency').val() == "@session.get("currencyId")" && $('#fromCurrency').val() != "" && $('#toCurrency').val() != ""){
+		$('.label1').text('');
+		$('.label2').text('');
+		$('.toCur2').hide();
+		$('.toCur1').hide();
+		$('.hideRate').hide();
+		$('.hideCurrency').hide();
+		$('#toLocalAmount').autoNumeric('set',0);
+		$('#fromLocalAmount').autoNumeric('set',0);
+	} else if($('#fromCurrency').val() !="@session.get("currencyId")" && $('#toCurrency').val() !="@session.get("currencyId")" && $('#fromCurrency').val() != "" && $('#toCurrency').val() != "" && $('#fromCurrency').val()==$('#toCurrency').val()){
+		if($('#currencyVal').val() !=""){
+			
+			if($('#multiply').is(':checked')){
+				getExchangeRate($('#toCurrency option:selected').val(),$('#fromCurrency option:selected').val());
+				$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount(exchangeRate1Value,@session.get("currencyExponent")));
+			} else {
+				getExchangeRate($('#fromCurrency option:selected').val(),$('#toCurrency option:selected').val());
+				$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount(exchangeRate2Value,@session.get("currencyExponent")));
+			}
+		$('.label1').text('( @session.get("currencyName") to '+$('#fromCurrency option:selected').text()+' )');
+		}
+		$('.toCur1').show();
+		$('.hideRate').show();
+		$('.toCur2').hide();
+		$('.label2').text('');
+		$('.hideCurrency').hide();
+		$('#toLocalAmount').autoNumeric('set',0);
+		$('#fromLocalAmount').autoNumeric('set',0);
+	} else if($('#fromCurrency').val() !="@session.get("currencyId")" && $('#toCurrency').val() !="@session.get("currencyId")" && $('#fromCurrency').val() != "" && $('#toCurrency').val() != "" ) {
+		$('.toCur2').show();
+		$('.toCur1').show();
+		$('.hideRate').show();
+		$('.hideCurrency').show();
+		if($('#currencyVal').val() !=""){
+		if($('#multiply').is(':checked')){
+			
+			var ids=$('#fromCurrency option:selected').val();
+			if($('#fromCurrency option:selected').val() == $('#currencyVal option:selected').val()){
+				ids=$('#currencyVal option:selected').val();
+			}
+			
+			getExchangeRate($('#toCurrency option:selected').val(),ids);
+			$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount(exchangeRate1Value,@session.get("currencyExponent")));
+			$('.label1').text('( '+$('#currencyVal option:selected').text()+' to '+$('#fromCurrency option:selected').text()+' )');
+			
+			getExchangeRate(ids,'@session.get("currencyId")');
+			$('#exchangeRate2').autoNumeric('set',removeExponentFromAmount(exchangeRate2Value,@session.get("currencyExponent")));
+			$('.label2').text('( '+$('#fromCurrency option:selected').text()+' to @session.get("currencyName") )');	
+			
+		} else {
+			var ids=$('#fromCurrency option:selected').val();
+			if($('#fromCurrency option:selected').val() == $('#currencyVal option:selected').val()){
+				ids=$('#currencyVal option:selected').val();
+			}
+			
+			getExchangeRate(ids,$('#toCurrency option:selected').val());
+			$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount(exchangeRate2Value,@session.get("currencyExponent")));
+			$('.label1').text('( '+$('#fromCurrency option:selected').text()+' to '+$('#currencyVal option:selected').text()+' )');
+			
+			getExchangeRate('@session.get("currencyId")',ids);
+			$('#exchangeRate2').autoNumeric('set',removeExponentFromAmount(exchangeRate1Value,@session.get("currencyExponent")));
+			$('.label2').text('( @session.get("currencyName") to '+$('#fromCurrency option:selected').text()+')');
+			
+		}
+		}
+	} else if($('#fromCurrency').val() != "" && $('#toCurrency').val() != ""){
+		if($('#currencyVal').val() !=""){
+			
+		if($('#multiply').is(':checked')){
+			getExchangeRate($('#fromCurrency option:selected').val(),$('#toCurrency option:selected').val());
+			$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount(exchangeRate2Value,@session.get("currencyExponent")));
+			$('.label1').text('( '+$('#currencyVal option:selected').text()+' to '+$('#fromCurrency option:selected').text()+' )');	
+		} else {
+			getExchangeRate($('#toCurrency option:selected').val(),$('#fromCurrency option:selected').val());
+			$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount(exchangeRate1Value,@session.get("currencyExponent")));
+			$('.label1').text('( '+$('#fromCurrency option:selected').text()+' to '+$('#currencyVal option:selected').text()+' )');
+		}
+		}
+		$('.toCur1').show();
+		$('.hideRate').show();
+		$('.hideCurrency').show();
+	} else {
+		$('.toCur2').hide();
+		$('.label1').text('');
+		$('.label2').text('');
+		$('#toLocalAmount').autoNumeric('set',0);
+		$('.hideCurrency').hide();
+	}
+	if($('#fromCurrency').val() == "@session.get("currencyId")" || $('#toCurrency').val() == "@session.get("currencyId")"){
+		$('.toCur2').hide();
+		$('.label2').text('');
+		$('#toLocalAmount').autoNumeric('set',0);
+	}
+	if($('#fromCurrency').val() == $('#currencyVal').val()){
+		$('.label1').text('( '+$('#currencyVal option:selected').text()+' to '+$('#toCurrency option:selected').text()+' )');
+	}
+	/*   if($('#fromAccount').val()==$('#toAccount').val() && $('#fromCurrency').val()==$('#toCurrency').val()){
+		$('.label1').text('');
+	} 
+	 */
+	/* if($('#fromCurrency').val()=="@session.get("currencyId")" && $('#fromCurrency').val()=="@session.get("currencyId")"){
+		$('.label1').text('');
+	} */ 
+	if($('#currencyVal').val() == ""){
+		
+	}
+	calcLocalTotal("");	
+}
+
+function calcLocalTotal(data,flag){
+	debugger
+	var aaaa;
+	var localPrice1=0;
+	var localPrice2=0;
+	if($('#multiply').is(':checked')){
+		if($('#fromCurrency').val() != "@session.get("currencyId")" && $('#toCurrency').val() != "@session.get("currencyId")" && $('#fromCurrency').val() != $('#toCurrency').val()){
+			localPrice1=Number($('#exchangeRate1').autoNumeric('get')) * Number($('.transferAmt').autoNumeric('get'));
+			localPrice1=Number($('#exchangeRate2').autoNumeric('get')) * localPrice1;
+			localPrice2 = localPrice1;
+		}else{
+		localPrice1=Number($('#exchangeRate1').autoNumeric('get')) * Number($('.transferAmt').autoNumeric('get'));
+		if($('#exchangeRate2').autoNumeric('get') != 0){
+			localPrice2=Number($('#exchangeRate1').autoNumeric('get')) * Number($('#exchangeRate2').autoNumeric('get')) * Number($('.transferAmt').autoNumeric('get'));
+		} else {
+			localPrice2=Number($('#exchangeRate1').autoNumeric('get')) * Number($('.transferAmt').autoNumeric('get'));
+		}}
+	} else {
+		if($('#fromCurrency').val() != "@session.get("currencyId")" && $('#toCurrency').val() != "@session.get("currencyId")" && $('#fromCurrency').val() != $('#toCurrency').val()){
+			localPrice1= Number($('.transferAmt').autoNumeric('get')) / Number($('#exchangeRate1').autoNumeric('get'));
+			localPrice1= localPrice1 / Number($('#exchangeRate2').autoNumeric('get'));
+			localPrice2 = localPrice1;
+		}else{
+		localPrice1=Number($('.transferAmt').autoNumeric('get')) / Number($('#exchangeRate1').autoNumeric('get'));
+		if($('#exchangeRate2').autoNumeric('get') != 0){
+			localPrice2=Number($('.transferAmt').autoNumeric('get')) / (Number($('#exchangeRate2').autoNumeric('get') * Number($('#exchangeRate2').autoNumeric('get'))));
+		} else {
+			localPrice2=Number($('.transferAmt').autoNumeric('get')) / Number($('#exchangeRate1').autoNumeric('get'));
+		}}
+	}
+		
+	if($('#fromCurrency').val() != ""){
+		$('#fromLocalAmount').autoNumeric('set',localPrice1);
+	} else {
+		$('#fromLocalAmount').autoNumeric('set',0);
+	}
+	
+	if($('#toCurrency').val() != ""){
+		$('#toLocalAmount').autoNumeric('set',localPrice2);
+	} else {
+		$('#toLocalAmount').autoNumeric('set',0);
+	} 
+	
+	if($('#fromCurrency').val() == "@session.get("currencyId")" && $('#toCurrency').val() == "@session.get("currencyId")" && $('#fromCurrency').val() != "" && $('#toCurrency').val() != ""){
+		$('#toLocalAmount').autoNumeric('set',0);
+		$('#fromLocalAmount').autoNumeric('set',0);
+		$('#exchangeRate1').autoNumeric('set',0)
+		$('#exchangeRate2').autoNumeric('set',0)
+	}
+	
+	debugger
+	if(typeof $('.id_fromAccount').val() != 'undefined' && $('.id_fromAccount').val() !="" && $('#fromCurrency option:selected').val() != ""){
+		setAccountBalance($('.id_fromAccount').val(),$('#fromCurrency option:selected').val(),1,$('.name_fromAccount').val(),$('#fromCurrency option:selected').text(),flag);	
+	} 
+	
+	if(typeof $('.id_toAccount').val() != 'undefined' && $('.id_toAccount').val() !="" && $('#toCurrency option:selected').val() != ""){
+		setAccountBalance($('.id_toAccount').val(),$('#toCurrency option:selected').val(),2,$('.name_toAccount').val(),$('#toCurrency option:selected').text(),flag);	
+	}
+	
+	if(typeof $('#fromAccount').val() != 'undefined' && $('#fromAccount').val() !="" && $('#fromCurrency option:selected').val() != "" &&
+		typeof $('#toAccount').val() != 'undefined' && $('#toAccount').val() !="" && $('#toCurrency option:selected').val() != "" ){
+		setAccountBalance($('#fromAccount option:selected').val(),$('#fromCurrency option:selected').val(),1,$('#fromAccount option:selected').text(),$('#fromCurrency option:selected').text(),1,flag);
+		setAccountBalance($('#toAccount option:selected').val(),$('#toCurrency option:selected').val(),2,$('#toAccount option:selected').text(),$('#toCurrency option:selected').text(),2,flag);
+	} 
+}
+
+function multiplyFun() {
+	setLabel(2);
+}
+
+function divideFun() {
+	setLabel(2);
+}
+
+	
+function errorMessage(id) {
+	$('.'+id).show();
+	window.setTimeout(function() {
+		$('.'+id).hide();
+	}, 3000);
+}
+
+function getExchangeRate(value1,value2){	
+	$.ajax({
+			type: "POST",
+	    	url: "/getExchangeRate",
+	    	data:'value1='+value1+'&value2='+value2,
+	    	dataType: "json",
+	    	async:false,
+	    	success: function(data){
+	    		if(data.length>0){
+	    			exchangeRate1Value=data[0].exchangeRateMultiply;
+	    			exchangeRate2Value=data[0].exchangeRateDivided;
+	    		} 
+	    	}
+	     });
+  } 
+
+
+function setAccountBalance(value1,value2,id,acc_name,cur_name,type,flag){
+	debugger
+	var balanceVal=0;
+	var currencyId="",divideFlag="",amt="",fromCurrency="",toCurrency="",fromAccountId="",toAccountId="",inputAmt="",exRate1="",exRate2="";
+	if(typeof type != 'undefined' && type != ""){
+		fromCurrency=$('#fromCurrency option:selected').val();
+		toCurrency=$('#toCurrency option:selected').val();
+		fromAccountId=$('#fromAccount').val();
+		toAccountId=$('#toAccount').val();
+		if($('#multiply').is(':checked'))
+			divideFlag=1;
+		else
+			divideFlag=2;
+		
+		if(Number($('#fromLocalAmount').autoNumeric('get')) == 0){
+			amt=addExponentToAmount(Number($('.transferAmt').autoNumeric('get')),@session.get("exponent"));
+		} else {
+			amt=addExponentToAmount(Number($('#fromLocalAmount').autoNumeric('get')),@session.get("exponent"));
+		}
+		inputAmt=addExponentToAmount(Number($('.transferAmt').autoNumeric('get')),@session.get("exponent"));
+		
+		exRate1=addExponentToAmount(Number($('#exchangeRate1').autoNumeric('get')),@session.get("currencyExponent"));
+		exRate2=addExponentToAmount(Number($('#exchangeRate2').autoNumeric('get')),@session.get("currencyExponent"));
+		if($('#currencyVal option:selected').val() !=""){
+			currencyId=$('#currencyVal option:selected').val();
+		}
+		
+	}
+	$.ajax({
+		type: "POST",
+    	url: "/getAccountBalance",
+    	data:'value1='+value1+'&value2='+value2+'&divideFlag='+divideFlag+'&value3='+amt+'&fromCurrencyId='+fromCurrency+'&toCurrencyId='+toCurrency+'&fromAccountId='+fromAccountId+'&toAccountId='+toAccountId+'&value4='+inputAmt+'&exRate1='+exRate1+'&exRate2='+exRate2+'&currencyId='+currencyId+'&type='+type,
+    	dataType: "json",
+    	async:false,
+    	success: function(data){
+    		debugger
+    		var balanceVal="";
+    		var updateBal="";
+    		$.each(data, function(key, value){
+    			if(Number(key) == 0)
+    				balanceVal=value;
+    			else
+    				updateBal=value;
+    		});
+    		if(id==2){
+    			if(value1!="@session.get("currencyId")"){
+    				if(flag) {
+	    				if(updateBal != "" || Number(updateBal) == 0){
+	    					var newBal=balanceVal-updateBal;
+	    					if(Number(newBal) == 0)
+	    						$('#credit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span>&nbsp;+&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(Math.abs(newBal),@session.get("exponent"))+'</span>&nbsp;&nbsp;=&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(updateBal,@session.get("exponent"))+'</span></b><br>');
+	    					else
+	    						$('#credit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span>&nbsp;+&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(Math.abs(newBal),@session.get("exponent"))+'</span>&nbsp;&nbsp;=&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(updateBal,@session.get("exponent"))+'</span></b><br>');
+	    				} else {
+	    					$('#credit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span>&nbsp;+&nbsp;<span class="tableAmtValue">'+Number(0)+'</span>&nbsp;&nbsp;=&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span></b><br>');
+	    				}
+    				} else {
+    					$('#credit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span></b><br>');
+    				}
+    			$('.tableAmtValue').autoNumeric('init');
+    			$('.tableAmtValue').autoNumeric('update');
+    			} else {
+    				$('#credit').html('');
+    			}
+    			} else {
+    			if(value1!="@session.get("currencyId")"){
+    				if(flag) {
+	    				if(updateBal != ""  || Number(updateBal) == 0){
+	    					var newBal=balanceVal-updateBal;
+	    					if(Number(newBal) == 0)
+	    						$('#debit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span>&nbsp;-&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(Math.abs(newBal),@session.get("exponent"))+'</span>&nbsp;&nbsp;=&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(updateBal,@session.get("exponent"))+'</span></b><br>');
+	    					else
+	    						$('#debit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span>&nbsp;-&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(Math.abs(newBal),@session.get("exponent"))+'</span>&nbsp;&nbsp;=&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(updateBal,@session.get("exponent"))+'</span></b><br>');
+	    				} else {
+	    					$('#debit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span>&nbsp;-&nbsp;<span class="tableAmtValue">'+Number(0)+'</span>&nbsp;&nbsp;=&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span></b><br>');
+	    				}
+    				} else {
+    					$('#debit').html('<b>'+acc_name+' - '+cur_name+' :&nbsp;&nbsp;<span class="tableAmtValue">'+removeExponentFromAmount(balanceVal,@session.get("exponent"))+'</span></b><br>');
+    				}
+    				$('.tableAmtValue').autoNumeric('init');
+    				$('.tableAmtValue').autoNumeric('update');
+    			} else {
+    				$('#debit').html('');
+    			}
+    		}
+    		if(!$('#jBox1').is(":visible") && $('.jBox-content').text() != "")
+    			model.open();
+    		if($('.jBox-content').text() == "")
+    			model.close();
+    	}
+    });
+}
+
+@if(transcation!=null){	
+function setEditOnloadValues() {
+	$("#fromCurrency option:last-child").remove();
+	$("#toCurrency option:last-child").remove();
+	$('.viewBtn').show();
+	$('.resetBtn').hide();
+	$('#orderFormValid :input').attr('disabled','disabled');
+	$('.viewBtn').removeAttr('disabled');
+	$('.closeBtn').removeAttr('disabled');
+	$("#dateHidden").removeAttr('disabled');
+	$("#date").removeAttr('disabled');
+	$(".textDescription").removeAttr('disabled');
+	$("#date").datepicker({ format: 'dd/mm/yy', autoclose : true,endDate: new Date()});
+	var dateFormat=$.datepicker.formatDate('dd/mm/yy',new Date('@transcation.getTranscationDate'));
+	$("#dateHidden").val(dateFormat);
+	$("#date").datepicker('setDate','@transcation.getTranscationDate');
+	
+	$('.transferAmt').autoNumeric('set',removeExponentFromAmount(@transcation.getInputAmount,@session.get("exponent")));
+	@if(transcation.getCurrency() != null){
+		$('.hideCurrency').show();
+		$('#currencyVal').html('<option value="@transcation.getCurrency.getCurrencyId()">@transcation.getCurrency.getCurrencyCode()</option>');
+	}
+	if(@transcation.getMultiplyDivideFlag()==1){
+		$("#divide").prop("checked", false);
+		$("#multiply").prop("checked", true);
+	} else {
+		$("#multiply").prop("checked", false);
+		$("#divide").prop("checked", true);
+	}
+	$('#editTransId').val('@transcation.getTranscationId');
+	$('#fromAccount option[value="'+'@transcation.getFromAccount().getAccountId()'+'"]').attr("selected", "selected");
+	$('#fromAccount').after("<div id='temp' class='search-div aff-dispaly-none'>"
+			+"<input type='text' class='name'>"
+			+"<input type='text' class='id_fromAccount' name='fromAccount.accountId'>"
+			+"</div>");
+	$('.id_fromAccount').val('@transcation.getFromAccount().getAccountId');
+	
+	$('#toAccount option[value="'+'@transcation.getToAccount().getAccountId()'+'"]').attr("selected", "selected");
+	$('#toAccount').after("<div id='temp1' class='search-div aff-dispaly-none'>"
+			+"<input type='text' class='name' name=''>"
+			+"<input type='text' class='id_toAccount' name='toAccount.accountId'>"
+			+"</div>");
+	$('.id_toAccount').val('@transcation.getToAccount().getAccountId');
+	
+	$('#fromCurrency option[value="'+'@transcation.getFromCurrency().getCurrencyId()'+'"]').attr("selected", "selected");
+	$('#toCurrency option[value="'+'@transcation.getToCurrency().getCurrencyId'+'"]').attr("selected", "selected");
+	$('.textDescription').val('@transcation.getComments()');
+	$('#fromLocalAmount').autoNumeric('set',removeExponentFromAmount('@transcation.getFromLocalAmount()',@session.get("exponent")));
+	$('#toLocalAmount').autoNumeric('set',removeExponentFromAmount('@transcation.getToLocalAmount()',@session.get("exponent")));
+	$('#exchangeRate1').autoNumeric('set',removeExponentFromAmount('@transcation.getExchangeRate1()',@session.get("currencyExponent")));
+	$('#exchangeRate2').autoNumeric('set',removeExponentFromAmount('@transcation.getExchangeRate2()',@session.get("currencyExponent")));
+	if($('#exchangeRate2').autoNumeric('get')!=0){
+		$('.toCur2').show();
+	}
+	if($('#fromCurrency').val() == "@session.get("currencyId")" && $('#toCurrency').val() == "@session.get("currencyId")"){
+		$('.toCur1').hide();
+		$('.hideRate').hide();
+	}
+		if('@check'=="1"){
+		$('#orderFormValid :input').attr('disabled','disabled');
+		$('.viewBtn').hide();
+		$('.resetBtn').hide();
+		$('.closeBtn').removeAttr('disabled');
+		$('.closeBtn').show();
+		$('#details').show();
+		$('#recalledBy').hide();
+		$('#deletedBy').hide();
+		$('#createdBy').hide();
+		@if(transcation.getRecallUser() != null){
+			$('#recalledBy').show();
+			$('#recalledBy').html("Recalled By "+'@transcation.getRecallUser().getUserName()'+" on "+splitDateAndTime('@transcation.getRecallDate()'));
+		}
+		@if(transcation.getDeleteUser() != null){
+			$('#deletedBy').show();
+			$('#deletedBy').html("Deleted By "+'@transcation.getDeleteUser().getUserName()'+" on "+splitDateAndTime('@transcation.getDeleteDate()'));
+		}
+		@if(transcation.getUser() != null){
+			$('#createdBy').show();
+			$('#createdBy').html("Created By "+'@transcation.getUser().getUserName()'+" on "+splitDateAndTime('@transcation.getTranscationDate()'));
+		}
+	}
+}
+}
+
+function emptyField(data){
+	$(data).autoNumeric('init');
+	if($(data).autoNumeric('get')=="0"){
+	$(data).val("");
+	}
+}
+
+function reintialize(data){
+	$(data).autoNumeric('init');
+	if($(data).autoNumeric('get')==""){
+		$(data).autoNumeric('set',0);
+	}else{
+	
+		 var newValue = parseFloat($('#exchangeRate1').autoNumeric('get'));
+		 $('#exchangeRate1').val(newValue);
+		 var newValues = parseFloat($('#exchangeRate2').autoNumeric('get'));
+		 $('#exchangeRate2').val(newValues);
+	}
+}
+
+function cancel(){
+	location.href='/viewTransfer';
+}
+
+function reset(){
+	location.reload();
+}
+
+function changeCurrency(data,flag,flagBox){
+	$("#fromCurrency option:last-child").css('display','none');
+	$("#toCurrency option:last-child").css('display','none');
+	if($(data).find('option:selected').text()=="@play.Play.application().configuration().getString("application.cash.accountId")" && flag==1){
+		$("#fromCurrency option:last-child").prop('selected',true).change();
+		$("#fromCurrency option:last-child").css('display','block');
+	}
+	else if($(data).find('option:selected').text()=="@play.Play.application().configuration().getString("application.cash.accountId")" && flag==2){
+		$("#toCurrency option:last-child").prop('selected',true).change();
+		$("#toCurrency option:last-child").css('display','block');
+	}
+	if($(data).find('option:selected').text()!="@play.Play.application().configuration().getString("application.cash.accountId")" && flag==1 && flagBox!=1 && flagBox!=2){
+		$("#fromCurrency option:first-child").prop('selected',true).change();
+	}
+	else if($(data).find('option:selected').text()!="@play.Play.application().configuration().getString("application.cash.accountId")" && flag==2 && flagBox!=1 && flagBox!=2){
+		$("#toCurrency option:first-child").prop('selected',true).change();
+	}
+	if(flagBox==1 || $(data).find('option:selected').text() != "@play.Play.application().configuration().getString("application.cash.accountId")" && flag==1){
+		$('#fromAccountBalance').autoNumeric('set',0);
+		if(typeof $('#fromAccount').val() != 'undefined' && $('#fromAccount').val() !="" && $('#fromCurrency option:selected').val() != ""){
+			setAccountBalance($('#fromAccount').val(),$('#fromCurrency option:selected').val(),1,$('#fromAccount option:selected').text(),$('#fromCurrency option:selected').text());	
+		}
+	}
+	else if(flagBox==2 || $(data).find('option:selected').text() != "@play.Play.application().configuration().getString("application.cash.accountId")" && flag==2){
+		$('#toAccountBalance').autoNumeric('set',0);
+		if(typeof $('#toAccount').val() != 'undefined' && $('#toAccount').val() !="" && $('#toCurrency option:selected').val() != ""){
+			setAccountBalance($('#toAccount').val(),$('#toCurrency option:selected').val(),2,$('#toAccount option:selected').text(),$('#toCurrency option:selected').text());	
+		}
+	}
+}
+</script>

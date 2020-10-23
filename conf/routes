@@ -1,0 +1,80 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+# An example controller showing how to use dependency injection
+GET     /count                      controllers.CountController.count
+# An example controller showing how to write asynchronous code
+GET     /message                    controllers.AsyncController.message
+# Map static resources from the /public folder to the /assets URL path
+GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
+
+GET     /                           controllers.HomeController.home
+GET     /login                     	controllers.HomeController.login
+GET     /tenantList                 controllers.HomeController.tenantList()
+GET     /logout                     controllers.HomeController.logout
+POST     /switchTenant               controllers.HomeController.switchTenant()
+GET     /viewCustomer               controllers.HomeController.viewCustomer
+GET     /viewUser               	controllers.HomeController.viewUser
+POST     /createUser               	controllers.HomeController.createUser
+POST     /resetUser               	controllers.HomeController.resetUser
+POST     /changePassword            controllers.HomeController.changePassword
+POST     /changeStatus            	controllers.HomeController.changeStatus
+POST     /changeMapingTenant        controllers.HomeController.changeMapingTenant()
+
+GET      /viewResetUser             controllers.HomeController.viewResetUser()
+POST     /resetUsersPassword         controllers.HomeController.resetUserPassword()
+GET      /mappingTenants/:id        controllers.HomeController.mappingTenants(id: String)
+
+GET     /viewRole               	controllers.HomeController.viewRole
+POST    /createRole               	controllers.HomeController.createRole
+GET		/searchRoleName/:id			controllers.SearchController.searchRoleName(id: String)
+GET		/fromToDateTransactionDetails	controllers.SearchController.fromToDateTransactionDetails()
+#GET	/createTransaction			controllers.HomeController.createTransaction()
+GET     /viewCurrency               controllers.HomeController.viewCurrency
+GET     /viewReports               	controllers.HomeController.viewReport
+GET     /viewTransfer               controllers.HomeController.viewTransfer
+GET     /viewHome               	controllers.HomeController.viewHome()
+POST	/createCustomer				controllers.MasterController.createCustomer()
+POST	/updateCustomer				controllers.MasterController.updateCustomer()
+POST	/updateCurrency				controllers.MasterController.updateCurrency()
+POST	/createCurrency				controllers.MasterController.createCurrency()
+POST	/createTransfer				controllers.TransferController.createTransfer()
+GET		/searchTransNo/:id			controllers.MasterController.searchTransNo(id:String)
+GET		/searchAccountNameWithExp/:id	controllers.SearchController.searchAccountNameWithExp(id:String)
+GET		/searchAccountNameWithoutCashandExp/:id controllers.SearchController.searchAccountNameWithoutCashandExp(id:String)
+POST 	/downloadReport				controllers.ReportController.downloadReport()
+GET     /viewLedgerReport       	controllers.HomeController.viewLedgerReport()
+POST     /currencyReportView       	controllers.ReportController.currencyReportView()
+POST     /viewVendorCurrencyReport   controllers.ReportController.viewVendorCurrency()
+POST     /editTransaction       	controllers.TransferController.editTransaction()
+#POST	/viewTransferDetails		controllers.TransferController.viewTransferDetails()
+GET		/deleteRecallTrans			controllers.TransferController.deleteRecallTrans()
+GET     /viewAccountBalanceList     controllers.FinanceController.viewAccountBalanceList()
+GET     /createAccountBalance       controllers.FinanceController.createAccountBalance()
+POST	/saveAccountBalance			controllers.FinanceController.saveAccountBalance()
+POST	/updateAccountBalance		controllers.FinanceController.updateAccountBalance()
+GET		/transAction/:id			controllers.MasterController.transAction(id: String)
+GET		/deleteRecallTransaction/:id	controllers.MasterController.deleteRecallTransaction(id: String)
+GET		/searchCurrencyCode/:id		controllers.SearchController.searchCurrencyCode(id: String)
+GET		/searchAccountName/:id		controllers.SearchController.searchAccountName(id: String)
+GET     /searchTenantName/:id       controllers.SearchController.searchTenantName(id: String)
+POST    /deleteTransfer       		controllers.TransferController.deleteTransfer()
+POST    /recallTransfer       		controllers.TransferController.recallTransfer()
+POST    /updateTransfer       		controllers.TransferController.updateTransfer()
+POST     /viewTransBal       		controllers.TransferController.viewTransBal()
+POST      /addExchange             controllers.MasterController.addExchange()
+GET      /createExchange/:id       controllers.MasterController.createExchange(id: String)
+GET     /viewExchange              controllers.MasterController.viewExchange()       
+#POST    /edit                     controllers.MasterController.edit()
+POST    /updateExchange            controllers.MasterController.updateExchange()
+POST    /setCurrencyValues          controllers.MasterController.setCurrencyValues()
+POST    /getExchangeRate            controllers.FinanceController.getExchangeRate()
+POST    /getAccountBalance          controllers.FinanceController.getAccountBalance()
+POST     /ledgerReportView       	controllers.ReportController.viewLedgerReport()
+GET      /profitAndLossReport       controllers.ReportController.profitAndLossReport()
+GET     /viewProfitAndLoss           controllers.ReportController.viewProfitAndLossReport()
+GET     /getUserTenant	           controllers.SearchController.getUserTenant()
+GET     /customerNameValidate      controllers.ReportController.customerNameValidate()
+GET		/settings					controllers.HomeController.viewSettings()
+POST    /uploadImage				controllers.HomeController.uploadImage()
+GET    /getBackImage				controllers.HomeController.getBackImage()

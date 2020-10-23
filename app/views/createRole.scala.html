@@ -1,0 +1,164 @@
+@(menus:List[entity.Menu],roles:List[entity.Roles])
+@views.html.main(){
+
+    <script type="text/javascript" src="@routes.Assets.versioned("js/jquery.treegrid.js")"></script>
+    <link href="@routes.Assets.versioned("stylesheets/jquery.treegrid.css")" rel="stylesheet" type="text/css">
+    
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Role</a></li>
+        </ol>
+    </div>
+</div>
+
+
+<button class="btn aff-tr-blue aff-txt-silver createRole" type="submit" onclick="createRole()">Create <i class="fa fa-plus-square"></i></button>
+		<div class="row" id="roleList" >
+                     <div class="col-md-12">
+                        <table class="table table-bordered  table-hover table-striped" id="roleTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                                 <th><i class="fa fa-calendar"></i> Date</th>
+                                 <th><i class="fa fa-user"></i> Role Name</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                           @for(role <- roles){
+                           <tr>
+                           <td>@role.getDate()</td>
+                           <td>@role.getRoleName()
+                           </td>
+                           </tr>
+                           }
+						   </tbody>
+                        </table>
+                     </div>
+                  </div>
+
+<div class="col-md-12" id="createRoleForm" style="display:none">
+<form id="roleForm" method="post">
+</br>
+    <div class="row">
+        <div class="form-group">
+			<div style="display: block">
+				<label class="control-label col-md-2">Role Name</label>
+			</div>
+			<div class="col-md-3"style="display: block">
+				<input type="text" class="form-control" placeholder="Enter Role Name" id="rolName" onfocusout="checkRoleName()" name="roles.roleName">
+				<input type="hidden" name="roles.tenant.tenantId" value="@session.get("tenantId")">
+				<span style="color:red;display:none" class="roleError"></span>
+			</div>	
+		</div>
+	</div>
+	</br>
+<h5 style="color:red;display:none" class="menuError">Provide a menu for Role</h5>
+<table class="tree table">
+	<thead>
+  	<tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+  	<th>Menu</th>
+  	</tr>
+  	</thead>
+  	<tbody>
+  	@for(menuList <- menus){
+  	
+    <tr class="@menuList.getLevel()"><td><input type="checkbox" value="@menuList.getMenuId()"> @menuList.getMenuName()</td></tr>
+    
+    }
+  </tbody>
+</table>
+<br><br>
+      <div align="center" class="col-md-6">
+         <button class="btn btn-primary submit" type="button" onclick="validRole()"><i class="fa fa-check"></i> Submit</button>
+         <button class="btn btn-danger cancel" onclick="alertModal('cancelRole','cancel')" type="button"><i class="fa fa-times"></i> Cancel</button>
+      </div>
+</form>
+<form id="updateUserForm" method="post">
+<div class="editUserValues"></div>
+</form>
+</div>
+@views.html.alertModal()
+@views.html.commonJs()
+<script>
+$('.tree').treegrid();
+var roleName = [];
+$(function(){
+	/* $('input[name=roles]').focus(); */
+	@for(roleName <- roles){	 
+		roleName.push('@roleName.getRoleName()');
+	}        
+    roleName.join(",");
+	
+	$('#createRoleForm').hide();
+	$("#roleTable").dataTable({
+		 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+			  "iDisplayLength": 10
+	 });
+	$('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+   	if($('#roleTable tbody tr').length<=10)
+	{   
+	   $('.next').attr('class','next disabled');
+   	}
+	$('#roleTable_filter input').addClass('form-control');
+	$("#roleTable_filter input").attr("placeholder", "Type here to search");
+	$('.treegrid-container').css('display','flex');
+	$('input[type="checkbox"]').css("height","20px");
+	$('input[type="checkbox"]').css("width","18px");
+	$('input[type="checkbox"]').css("margin-top","0px");
+});
+
+function createRole() {
+	$('#createRoleForm').show();
+	$('.cancel').show();
+	$('.submit').show();
+	$('.close1').hide();
+	$('.createRole').hide();
+	$('#roleList').hide();
+	$('#roleForm').show();
+}
+
+function validRole(){
+	var count=0;
+	if($('#rolName').val()==""){
+	$('.roleError').html('');
+	$('.roleError').html('Role Name must be filled out').fadeIn();
+	$('.roleError').html('Role Name must be filled out').fadeOut(5000);
+	return;
+	}
+	$.each($("input[type='checkbox']:checked"), function(){            
+	 $(this).attr('name','rolePermissions['+count+'].menu.menuId');
+	 count++;
+ });
+if(count==0){
+	$('.menuError').fadeIn();
+	$('.menuError').fadeOut(5000);
+	return;
+}
+alertModal('submitRole','submit');
+}
+
+function submitRole(){
+	$('#roleForm').attr('action','/createRole');
+	$('#roleForm').submit();
+}
+
+function cancelRole() {
+	location.reload();
+}
+
+function checkRoleName(){
+	var length=roleName.length;
+	for(var i=0;i<length;i++){
+		if($('#rolName').val()==roleName[i]){
+			$('#rolName').val("");
+			$('.roleError').html('');
+			$('.roleError').html('Role Name already exists').fadeIn();
+			$('.roleError').html('Role Name already exists').fadeOut(5000);
+		}	
+	}
+}
+
+</script>
+
+} 

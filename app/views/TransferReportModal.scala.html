@@ -1,0 +1,92 @@
+@()
+<style>
+.report-modal-boxsss{
+    padding: 0px;
+    width: 850px;
+}
+.icon-pdf{
+	color:brown;
+}
+.icon-excel{
+	color:green;
+}
+.button-align-right{
+	margin-right: 20px;
+	margin-top: -1px;
+}
+.closeSymbol {
+    margin-top: -3px;
+    margin-right: -4px;
+}
+</style>
+
+<div id="reportViewModal" class="modal fade">
+	<div class="modal-dialog report-modal-boxsss">
+    	<div class="modal-content">
+        	<div class="modal-header ">
+  				<h4 class="modal-title"> @Messages("reportView")
+  					<div class="pull-right button-align-right"> 
+						<span onclick="downloadViewReports()"><i class="fa fa-file-excel-o aff-action icon-excel" aria-hidden="true" title="@Messages("downloadExcel")"></i></span>
+					</div>
+				</h4>
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true" title="@Messages("close")">&times;</button>          
+     		</div>
+         	<div class="modal-body">
+            	<div class="externalPageDiv" id="externalPageDiv"></div>
+         	</div>
+         	<div class="modal-footer">
+				<span onclick="downloadViewReports()"><i class="fa fa-file-excel-o aff-action icon-excel" aria-hidden="true" title="@Messages("downloadExcel")"></i></span>
+				<button type="button" class="close closeSymbol" data-dismiss="modal" aria-hidden="true" title="@Messages("close")">&times;</button>
+         	</div>
+      	</div>
+   	</div>
+</div>
+
+ <form id="transferReportForm" class="form-horizontal col-md-3" style="margin-left:  -123px;display: none;" action="@controllers.routes.ReportController.downloadReport()" method="post">
+
+<input type="hidden" id="hiddenTransferId" name="transferId">
+<input type="hidden" id="hiddenTransferReportId" name="reportId">
+</form>
+<script>
+
+function reportModalView(fromUrl,formData) {
+	debugger
+	var xhrForm = new XMLHttpRequest();
+    xhrForm.open("POST",fromUrl,true);
+    xhrForm.send(formData);
+    xhrForm.onreadystatechange = function () {
+    	if(xhrForm.readyState == 4){
+    		if(xhrForm.status==200){
+	    		$('#externalPageDiv').html(xhrForm.responseText);
+	    		$("#reportViewModal").modal('show');
+    		} else {
+    			console.log('Error to View');
+    		}
+    	} 
+    }
+}
+
+function viewReport(transferId) {
+	debugger
+	var formUrl = "downloadReport";
+	var formValues = setFormData(transferId);
+	reportModalView(formUrl,formValues);
+}
+
+function setFormData(transferId) {
+	debugger
+	var formData = new FormData();
+	formData.append("reportId","6003");
+	formData.append("transferId",transferId);
+	formData.append("documentType","html");
+	return formData;
+}
+
+function downloadTransferReport(transferId) {
+	debugger
+	$('#hiddenTransferReportId').val("6003");
+	$('#hiddenTransferId').val(transferId);
+	$('#transferReportForm').submit();
+}
+
+</script>

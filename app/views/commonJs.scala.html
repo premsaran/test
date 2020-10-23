@@ -1,0 +1,97 @@
+@()
+<style>
+.aff-dispaly-none {
+	display:none;
+}
+
+</style>
+<script>
+function addExponentToAmount(value,exponent)
+{
+	 //var value = value*(Math.pow(10,exponent));
+	 var value = Math.round(value*(Math.pow(10,exponent)))
+	 return Number(value.toFixed(exponent));
+}
+
+
+function removeExponentFromAmount(value,exponent)
+{
+	var value = value*(Math.pow(10,-(exponent)))
+	 return Number(value.toFixed(exponent));
+}
+
+function resetFromTo(data) {	
+	var value = $(data).val();
+	if(value != "") {
+		var selectedName = $(data).next('div').children('input:eq(0)').val();
+		if(selectedName) {
+			if(value != selectedName) {
+				$(data).val('');	
+			}
+			$(data).val(selectedName);
+		}  
+	}
+}
+
+
+function autocompleteInitialize(className,url,nameField,idField,functionCallName){
+	$('.'+className).autocomplete({
+		autoFocus :true,
+		source :function( request, response ) {
+		    $.ajax({
+		       url: "/"+url+"/"+request.term,
+		       dataType: "json",
+		       success: function( data ) {
+		    	 if($('.'+className).val().length>=1){
+		           response($.map(data, function(item) {
+		                 return {
+		                     label : item.data,
+		                     value : item.value
+		                 };
+		           }));
+		       }
+		       }	 
+		    });
+		   },
+		   select: function (event, ui) {
+			   debugger
+		         //$('.'+className).val(ui.item.label);
+		        // $("#value").val(ui.item.value);
+		         $('#temp_'+className).remove();                
+		         
+		        	var name= (ui.item.label).replace(/'/g,"&#39;").replace(/"/g,'\"');
+		            $('.'+className).after("<div id='temp_"+className+"' class='search-div aff-dispaly-none'>"
+		            				+"<input type='text' class='name_"+className+"' name='"+nameField+"' value='"+ui.item.label+"'>"
+		            				+"<input type='text' class='id_"+className+"' name='"+idField+"' value='"+ui.item.value+"'>"
+		            				+"</div>");
+		            if(functionCallName!=null)
+		            {
+		            	try{
+		            	window[functionCallName](ui.item,className);
+		            	}catch(e){
+		            		console.log(e)
+		            	}
+		            }
+		            
+		         return false;
+		   },
+		   focus: function (event, ui) {
+			    this.value = ui.item.label;
+			     event.preventDefault();
+			}
+		   
+		}); 
+}
+
+function splitDateAndTime(date){
+	var date = date.split(" ");
+	var timesplit  =date[1].split(".");
+    return $.datepicker.formatDate('dd-mm-yy', new Date(date[0]))+" "+timesplit[0]; 
+}
+function splitDate(date){
+	var date = date.split(" ");
+	var timesplit  =date[1].split(".");
+	return $.datepicker.formatDate('dd-mm-yy', new Date(date[0]));
+}
+
+</script>

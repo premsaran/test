@@ -1,0 +1,296 @@
+@(customerList:List[entity.Customer])
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Customer</a></li>
+        </ol>
+    </div>
+</div>
+
+        <!-- page start-->
+		
+		<button class="btn aff-tr-blue aff-txt-silver createCurrency" type="submit" onclick="createCurrency()">Create <i class="fa fa-plus-square"></i></button>
+		<span class="emptyCustomerError" style="color:red;display:none;">Empty Row not allowed</span>
+		<span class="existCustomerError" style="color:red;display:none;">Same Name not allowed</span>
+		<div class="row" id="currencyList" >
+                     <div class="col-md-12">
+                        <table class="table table-bordered  table-hover table-striped" id="customerTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                                 <th><i class="fa fa-user"></i> Customer Name</th>
+                                 <th><i class="fa fa-bookmark"></i> Customer Code</th>
+								 <th> Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+						   @for(customer <- customerList){
+							   <tr>
+							   <td >
+							   <div class="customerName">@customer.getCustomerName()</div>
+							    <div class="editCustomerName" style="display:none"><input type="text"  class="customerNameText form-control" value="@customer.getCustomerName()" style="width: 100%"></div>
+							   </td>
+							   <td>
+							   <div class="customerCode">@customer.getCustomerCode()</div>
+							   <div class="editCustomerCode" style="display:none"><input type="text"  class="customerCodeText form-control" value="@customer.getCustomerCode()" style="width: 100%">
+							   <input type="hidden"  class="customerIdText form-control" value="@customer.getCustomerId()">
+							   <input type="hidden"  class="tenantId" name="tenant.tenantId" value="@session.get("tenantId")">
+							   </div>
+							   </td>
+							   <td class="text-center customerActionBtn">
+							   <a href="#" class="editCustomer" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement='bottom'></i></span></a>
+							   </td>
+							   </tr>
+						   }
+						   </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  <div class="col-md-12" id="createCustomerForm" style="display:none">
+<form id="currencyForm" method="post">
+<div class="row">
+<div class="col-md-1">
+<button class="btn aff-tr-blue aff-txt-silver addCurrency" type="button" onclick="addCustomer()">Add <i class="fa fa-plus-square"></i></button>
+</div>
+<div class="col-md-4">
+<span class="customerError" style="color:red;display:none;">Empty values not allowed</span>
+<span class="sameCustomerError" style="color:red;display:none;"></span>
+</div>
+</div>
+</br>
+    <div class="row">
+        <div class="form-group">
+			<div style="display: block">
+				<label class="control-label col-md-2">Customer Code</label>
+			</div>
+			<div style="display: block">
+				<label class="control-label col-md-2">Customer Name</label>
+			</div>	
+			 <input type="hidden" name="tenant.tenantId" value="@session.get("tenantId")">
+		</div>
+	</div>
+	<div class="currencyRow"></div>
+<br><br>
+      <div align="center" class="col-md-6">
+         <button class="btn btn-primary submit" type="button" onclick="validCurrency()"><i class="fa fa-check"></i> Submit</button>
+         <button class="btn btn-danger cancel" onclick="alertModal('cancelCurrency','cancel')" type="button"><i class="fa fa-times"></i> Cancel</button>
+         <button class="btn btn-danger close"  onclick="alertModal('closeCurrency','close')" type="button"><i class="fa fa-times"></i> Close</button>
+      </div>
+</form>
+<form id="updateCustomerForm" method="post">
+<div class="editCustomerValues"></div>
+</form>
+</div>
+@views.html.alertModal()
+<script>
+
+$(function(){
+	$('#createCustomerForm').hide();
+	$('#customerTable').dataTable({
+		 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+			  "iDisplayLength": 10
+
+	 });
+	 $('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+   if($('#customerTable tbody tr').length>10)
+	{   
+	   $('.next').attr('class','next');
+   	}
+	$('#customerTable_filter input').addClass('form-control');
+	$("#customerTable_filter input").attr("placeholder", "Type here to search");
+	
+	
+});
+
+function createCurrency() {
+	$('#createCustomerForm').show();
+	$('.cancel').show();
+	$('.submit').show();
+	$('.close1').hide();
+	$('.createCurrency').hide();
+	$('#currencyList').hide();
+	$('#currencyForm').show();
+}
+
+function cancelCurrency() {
+	location.reload();
+}
+
+function closeCurrency() {
+	location.reload();
+}
+
+$(function(){
+	for(var i=0;i<3;i++){
+		addCustomer();
+		}
+});
+var j=0;
+function validCurrency(){
+	var submitFlag=checkPreValidation();
+	
+	if(submitFlag){
+		alertModal('submitCurrency','submit');	
+	}
+}
+var customerMap={};
+function checkPreValidation(){
+	debugger
+	customerMap={};
+	var submitFlag=true;
+	for(var k=0;k<=j;k++){
+		if((typeof $('.validCode_'+k).val() != 'undefined' && typeof $('.validName_'+k).val() != 'undefined') && ($('.validCode_'+k).val() == "" || $('.validName_'+k).val() == "")){
+			$('.customerError').fadeIn();
+			$('.customerError').fadeOut(3000);
+			submitFlag=false;
+			return false;
+		} else if(typeof $('.validCode_'+k).val() != 'undefined' && $('.validCode_'+k).val() != "" && typeof $('.validName_'+k).val() != 'undefined' && $('.validName_'+k).val() != ""){
+			if(!customerMap.hasOwnProperty($('.validName_'+k).val().toLowerCase())){
+				customerMap[$('.validName_'+k).val().toLowerCase()]=$('.validName_'+k).val().toLowerCase();
+			} else {
+				$('.sameCustomerError').text("Same Name not allowed - "+$('.validName_'+k).val());
+				$('.sameCustomerError').fadeIn();
+				$('.sameCustomerError').fadeOut(3000);
+				submitFlag=false;
+				return false;		
+			}
+		}
+	}
+	var validFlag=true;
+	for(key in customerMap){
+		if(validFlag){
+			$.ajax({
+			type: "GET",
+	    	url: "/customerNameValidate?cusName="+customerMap[key]+"&id=",
+	    	dataType: "json",
+	    	async:false,
+	    	success: function(data){
+	    		debugger
+	    	if(data.length > 0){
+	    		var name="";
+	    		$.each(data, function(key, value){
+	    			name=value[1];
+	    		});
+	    		validFlag=false;
+	    		$('.sameCustomerError').text("Same Name not allowed - "+name);
+	    		$('.sameCustomerError').fadeIn();
+				$('.sameCustomerError').fadeOut(3000);
+				submitFlag=false;
+				return false;
+	    	}
+	    	}
+			});
+	    }
+	}
+	return submitFlag;
+}
+
+
+function submitCurrency(){
+	var count=0;
+	for(var k=0;k<=j;k++){
+		if(typeof $('.validCode_'+k).val() != 'undefined'){
+			$('.validCode_'+k).attr('name','customers['+count+'].customerCode');
+			$('.validName_'+k).attr('name','customers['+count+'].customerName');
+			count++;
+		}
+	}
+ 
+	 $('#currencyForm').attr('action','/createCustomer');
+	 $('#currencyForm').submit();
+}
+function addCustomer() {
+var row='<div class="row margin-top-5px">'+
+                  '<div class="form-group">'+
+		'<div class="col-md-2">'+
+			'<input type="text" class="form-control validCode_'+j+'" placeholder="Enter Customer Code" name="customers['+j+'].customerCode">'+
+			'<input type="hidden" class="tenantId" name="customers['+j+'].tenant.tenantId" value="@session.get("tenantId")">'+
+			'</div>'+
+		'<div class="col-md-2">'+
+			'<input type="text" class="form-control validName_'+j+'" placeholder="Enter Customer Name" name="customers['+j+'].customerName">'+
+		'</div>'+
+		
+		'</div>';
+		if(j!=0) {
+			row=row+'<div class="col-lg-1 remove"><a href="#"><i class="fa fa-times" title="Delete"></i></a>';
+		}
+   row=row+'</div>';
+   j++;
+	$('.currencyRow').append(row);
+}
+
+$(document).on('click','.remove',function() {
+	$(this).parent('div').remove();
+});
+
+$(document).on('click','.editCustomer',function()
+{
+	
+	$(this).closest('tr').find('.editCustomerName').show();
+    $(this).closest('tr').find('.editCustomerCode').show();
+    $(this).closest('tr').find('.customerName').hide();
+    $(this).closest('tr').find('.customerCode').hide();
+    
+	 $(this).closest('tr').find('.customerActionBtn').html('<a class="editSave" onclick="editsave(this)" href="javascript:;"><i class="fa fa-save aff-action-save editSave" title="@Messages("save")">  </i></a>  <a onclick="cancel(this)" class="cancelSave" href="javascript:;"><i class="fa fa-undo aff-action-undo cancel" title="@Messages("cancel")">  </i></a>');
+	 
+});
+
+function cancel(data)
+{
+	$(data).closest('tr').find('.customerCodeText').val($(data).closest('tr').find('.customerCode').text());
+	$(data).closest('tr').find('.customerNameText').val($(data).closest('tr').find('.customerName').text());
+	$(data).closest('tr').find('.editCustomerName').hide();
+    $(data).closest('tr').find('.editCustomerCode').hide();
+    $(data).closest('tr').find('.customerName').show();
+    $(data).closest('tr').find('.customerCode').show();
+	$(data).closest('tr').find('.customerActionBtn').html('<a href="#" class="editCustomer" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement="bottom"></i></span></a>');
+}
+
+function checkEditValidation(name,id) {
+	var submitFlag=true;
+			$.ajax({
+			type: "GET",
+	    	url: "/customerNameValidate?cusName="+name+"&id="+id+"",
+	    	dataType: "json",
+	    	async:false,
+	    	success: function(data){
+	    		debugger
+	    	if(data.length > 0){
+	    		validFlag=false;
+	    		$('.existCustomerError').fadeIn();
+				$('.existCustomerError').fadeOut(3000);
+				submitFlag=false;
+				return false;
+	    	}
+	    	}
+			});
+			return submitFlag;
+}
+
+
+function editsave(data)
+{
+	if(typeof $(data).closest('tr').find('.customerNameText').val() != 'undefined' && $(data).closest('tr').find('.customerNameText').val() != "" &&
+		typeof $(data).closest('tr').find('.customerCodeText').val() != 'undefined' && $(data).closest('tr').find('.customerCodeText').val() != ""){
+		if(checkEditValidation($(data).closest('tr').find('.customerNameText').val(),$(data).closest('tr').find('.customerIdText').val())){
+	$('.editCustomerValues').html('');
+	var customerdetail='<input type="hidden"  value="'+$(data).closest('tr').find('.customerNameText').val()+'" name="customerName">'
+ 	 	 +'<input type="hidden"  value="'+$(data).closest('tr').find('.customerCodeText').val()+'" name="customerCode">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.customerIdText').val()+'" name="customerId">'
+ 	 	+'<input type="hidden"  name="tenant.tenantId" value="@session.get("tenantId")">';
+ 	 	$('.editCustomerValues').append(customerdetail);
+ 	 	
+	 $('#updateCustomerForm').attr('action','/updateCustomer');
+	 $('#updateCustomerForm').submit();
+	} 
+	} else {
+		$('.emptyCustomerError').fadeIn();
+		$('.emptyCustomerError').fadeOut(3000);
+		return false;
+	}
+	 
+	 
+}
+</script> 
+}

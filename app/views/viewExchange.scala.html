@@ -1,0 +1,117 @@
+@(exchangeList:List[entity.ExchangeRates])
+@views.html.main(){
+ <div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Exchange Rate</a></li>
+        </ol>
+    </div>
+</div>
+ <div class="tab-pane">
+   <div style="text-align">
+	<br><br>
+ <a href="/createExchange/0" class="btn aff-tr-blue aff-txt-silver" id="createbtn"> Create <i class="fa fa-plus-square"></i></a>
+ <a href="/createExchange/1" class="btn aff-tr-blue aff-txt-silver" id="editbtn"> Edit <i class="fa fa-pencil-square-o"></i></a>
+ </div>
+ <br>
+ <div class="col-md-12">
+     <table class="table table-bordered" id="exchangeCreate">
+	 <thead>
+	 <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+	 <th class="col-md-2"><i class="fa fa-money"></i> From Currency</th>
+	 <th class="col-md-2"><i class="fa fa-money"></i> To Currency</th>
+	 <th class="col-md-2"><i class="fa fa-exchange"></i> Exchange Rate Multiply</th>
+	 <th class="col-md-2"><i class="fa fa-stack-exchange"></i> Reverse Exchange Rate Divided</th>
+	 <th class="col-md-1"><i class="fa fa-cogs"></i> Action</th>
+	 </tr>
+  </thead>
+  <tbody>
+  @for(exchange<-exchangeList){
+  <tr>
+      <td><div class="fromCurrency">@exchange.getFromCurrency().getCurrencyCode()</div>
+      <div class="editfromCurrency" style="display:none">
+      <input type="hidden" class="form-control exchangeRateId" value="@exchange.getExchangeRateId">
+      <input type="text"  name="fromCurrency"  class="fromCurrencyText form-control" value="@exchange.getFromCurrency().getCurrencyId()" style="width: 100%"></div>
+      </td>
+      <td><div class="toCurrency">@exchange.getToCurrency().getCurrencyCode()</div>
+      <div class="editToCurrency" style="display:none"><input type="text" name="toCurrency" class="toCurrencyText form-control" value="@exchange.getToCurrency().getCurrencyId()" style="width: 100%"></div>
+      </td>
+	  <td class="text-right"><div class="exchangeRateMultiply  text-right">@views.html.removeExponentToAmount(exchange.getExchangeRateMultiply(),session.get("currencyExponent"))</div>
+	 <div class="editexchangeRate" style="display:none"><input type="text"  class="exchangeRateText text-right  form-control" name="exchangeRateMultiply" value="@views.html.removeExponentToAmount(exchange.getExchangeRateMultiply(),session.get("currencyExponent"))" style="width: 100%"></div>
+      </td>
+      <td class="text-right"><div class="exchangeRateDivided text-right">@views.html.removeExponentToAmount(exchange.getExchangeRateDivided(),session.get("currencyExponent"))</div>
+      <div class="editExchangeRateReverse" style="display:none"><input type="text"  class="exchangeReverseText text-right form-control"  name="exchangeRateDivided" value="@views.html.removeExponentToAmount(exchange.getExchangeRateDivided(),session.get("currencyExponent"))" style="width: 100%"></div>
+      </td>
+       <td class="text-center exchangeRateActionBtn">
+	  <a href="#" class="editExchange" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement='bottom'></i></span></a>
+	</td>
+   </tr>
+    }
+    </tbody>
+</table>
+<br><br>
+
+   </div>
+   </div>
+   <form  id="exchangeRateEdit" method="POST">
+	<div class="editExchangerates"></div>
+</form>
+@views.html.commonJs()
+<script>
+$(function(){
+	$('#exchangeCreate').dataTable({
+	 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+	 	"bSort": false,
+		  "iDisplayLength": 10
+	});
+		  $('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+	   if($('#exchangeCreate tbody tr').length>10)
+		{   
+		   $('.next').attr('class','next');
+	   	}
+		$('#exchangeCreate_filter input').addClass('form-control');
+		$("#exchangeCreate_filter input").attr("placeholder", "Type here to search");
+	
+});
+    $(document).on('click','.editExchange',function()
+		{
+			
+			$(this).closest('tr').find('.editexchangeRate').show();
+		    $(this).closest('tr').find('.editExchangeRateReverse').show();
+		    $(this).closest('tr').find('.exchangeRateMultiply').hide();
+		    $(this).closest('tr').find('.exchangeRateDivided').hide();
+		    $(this).closest('tr').find('.customerActionBtn').html('')
+			$(this).closest('tr').find('.exchangeRateActionBtn').html('<a class="editsave" onclick="editsave(this)" href="javascript:;"><i class="fa fa-save aff-action-save editSave" title="@Messages("save")"> </i></a>  <a onclick="cancel(this)" class="cancelSave" href="javascript:;"><i class="fa fa-undo aff-action-undo cancel" title="@Messages("cancel")">  </i></a>');
+			 
+		});
+    
+    function cancel(data)
+    {
+    	$(data).closest('tr').find('.exchangeRateText').val($(data).closest('tr').find('.exchangeRateMultiply').text());
+    	$(data).closest('tr').find('.exchangeReverseText').val($(data).closest('tr').find('.exchangeRateDivided').text());
+    	$(data).closest('tr').find('.editexchangeRate').hide();
+    	$(data).closest('tr').find('.editExchangeRateReverse').hide();
+    	$(data).closest('tr').find('.exchangeRateMultiply').show();
+        $(data).closest('tr').find('.exchangeRateDivided').show();
+    	$(data).closest('tr').find('.exchangeRateActionBtn').html('<a href="#" class="editExchange" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement="bottom"></i></span></a>');
+    }
+
+   function editsave(data)
+    {
+    	$('.editExchangerates').html('');
+    	var exchangeRatedetail='<input type="hidden"  value="'+$(data).closest('tr').find('.exchangeRateId').val().trim()+'" name="exchangerates[0].exchangeRateId">'
+    		 +'<input type="hidden"  value="'+$(data).closest('tr').find('.fromCurrencyText').val().trim()+'" name="exchangerates[0].fromCurrency.currencyId">'
+     	 	 +'<input type="hidden"  value="'+$(data).closest('tr').find('.toCurrencyText').val().trim()+'" name="exchangerates[0].toCurrency.currencyId">'
+     	 	+'<input type="hidden"  value="'+addExponentToAmount(Number($(data).closest('tr').find('.exchangeRateText').val().trim()),@session.get("currencyExponent"))+'" name="exchangerates[0].exchangeRateMultiply">'
+     	 	+'<input type="hidden"  value="'+addExponentToAmount(Number($(data).closest('tr').find('.exchangeReverseText').val().trim()),@session.get("currencyExponent"))+'" name="exchangerates[0].exchangeRateDivided">';
+     	 	$('.editExchangerates').append(exchangeRatedetail);
+     	 	
+    	  $('#exchangeRateEdit').attr('action','/updateExchange');
+    	  $('#exchangeRateEdit').submit();
+    	
+    	 
+    	 
+    }
+</script>
+   }

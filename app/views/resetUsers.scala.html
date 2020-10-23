@@ -1,0 +1,92 @@
+@(userList:List[entity.User],statusList:List[entity.Status],tenantList:List[entity.Tenant])
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Reset Users</a></li>
+        </ol>
+    </div>
+</div>
+        <!-- page start-->
+		<div class="row" id="userList" >
+                     <div class="col-md-12">
+                        <table class="table table-bordered  table-hover table-striped" id="userTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                                 <th><i class="fa fa-user"></i> User Name</th>
+                                 <th><i class="fa fa-bookmark"></i> Created By</th>
+                                 <th><i class="fa fa-bookmark"></i> Status</th>
+                                 <th><i class="fa fa-bookmark"></i> Updated By</th>
+                                 <th><i class="fa fa-bookmark"></i> Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                           @for(user <- userList){
+                           <tr>
+                           <input type="hidden" class="userID" value='@user.getUserId()'>
+                           <td>@user.getUserName()</td>
+                           <td>@user.getCreatedBy()</td>
+                           <td>@user.getStatus().getStatusName()</td>
+                           <input type="hidden" class="userStatus" value='@user.getStatus().getStatusId()'>
+                           <input type="hidden" class="userStatusName" value='@user.getStatus().getStatusName()'>
+                           <input type="hidden" class="tenantID" id="tenantId" value="@user.getTenant().getTenantId()">
+                           <td>@user.getUpdatedBy()</td>
+                           @if(!user.getForcePasswordChange().equals("2")){
+                            <td><a href="#"  data-toggle="modal" id="passIcon" onclick="beforeModalOpen(this)"><span><i class="fa fa-legal" rel="tooltip" title="reset Users" data-placement='bottom'></i></span></a></td>
+                           }else{
+                           	<td><i class="fa fa-legal" rel="tooltip" title="reset Users" data-placement='bottom' disabled></i></td>
+                           }
+                           </tr>
+                           }
+						   </tbody>
+                        </table>
+                     </div>
+                  </div>
+<form id="resetUserPass" method="post">
+  <input type="hidden" class="tenantListId" id="tenantId" name="tenant.tenantId">
+  <input type="hidden" class="userListId" id="userId" name="userId" value="">
+  <input type="hidden" class="passwordListId" id="forcePasswordFlag" name="forcePasswordChange" value="">
+<div class="editUserValues"></div>
+</form>
+</div>
+@views.html.alertModal()
+@views.html.commonJs()
+<script>
+var loginId =[];
+var passwordFlag=0;
+$(function(){
+	@for(login <- userList){	 
+		loginId.push('@login.getLoginId()');
+	}        
+	loginId.join(",");
+	$('#createUserForm').hide();
+	$("#userTable").dataTable({
+		 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+			  "iDisplayLength": 10
+	 });
+	$('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+   	if($('#userTable tbody tr').length<=10)
+	{   
+	   $('.next').attr('class','next disabled');
+   	}
+	$('#userTable_filter input').addClass('form-control');
+	$("#userTable_filter input").attr("placeholder", "Type here to search");
+	autocompleteInitialize('tenant','searchTenantName','tenantName','tenantName','getTenantSearch');
+});
+var userId="",tenantId="",forcePasswordFlag="";
+function beforeModalOpen(data){
+	userId=$(data).closest('tr').find('.userID').val();
+	tenantId=$(data).closest('tr').find('.tenantID').val();
+	forcePasswordFlag=$(data).closest('tr').find('.forcePasswordFlag').val();
+	alertModal('resetUsers','Reset Password');
+}
+function resetUsers(){
+	$('#resetUserPass').attr('action','/resetUsersPassword');
+	$('.userListId').val(userId);
+	$('.tenantListId').val(tenantId);
+	$('.passwordListId').val(forcePasswordFlag);
+	$('#resetUserPass').submit();
+	}
+</script> 
+}

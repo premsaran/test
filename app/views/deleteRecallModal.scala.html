@@ -1,0 +1,78 @@
+@()
+<!-- Modal -->
+  				<div class="modal fade" id="viewModal" role="dialog">
+    				<div class="modal-dialog modal-lg">
+  
+      				<!-- Modal content-->
+      				<div class="modal-content">
+        				<div class="modal-header">
+          					<button type="button" class="close" data-dismiss="modal" style="margin-top: -11px;">&times;</button>
+          					<div class="modal-title" align="center"><h4 class="col-md-10" style="margin-top: -11px;" id="headerName"></h4>
+          					</div>
+          				</div>
+        				<div class="modal-body">
+          					<table class="table" id="viewTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+								 <th>Account</th>
+                                 <th>Currency</th>
+								 <!-- <th class="text-right">FC Dr Amount</th>
+								 <th class="text-right">FC Cr Amount</th> -->
+								 <th class="text-right">FC Prev Balance</th>
+								 <th class="text-right">FC Balance</th>
+								 <!-- <th class="text-right">Dr Amount</th>
+								 <th class="text-right">Cr Amount</th> -->
+								 <th class="text-right">Prev Balance</th>
+								 <th class="text-right">Balance</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                          
+						   </tbody>
+                        </table>
+        				</div>
+        				<div class="modal-footer" style="margin-top: unset;">
+        				<button type="button" class="btn btn-success" id="submitbtn" onclick="submitForm()">Confirm</button>
+        				</div>
+      				</div>  
+    				</div>
+  				</div>
+                  
+<script>
+function openDeleteRecallModal(transid,headerName,flag){
+	debugger
+	$.ajax({
+		type: "GET",
+		url: "/deleteRecallTransaction/"+transid,
+    	dataType: "json",
+    	success: function(data){
+    		debugger
+    		console.log(data);
+    		if(data.length>0){
+    			$('#viewTable tbody tr').remove();
+				$('#headerName').html('');
+				$('#headerName').html(headerName);
+    			if(flag==1){
+    				$('#submitbtn').hide();
+    					for(var i=0;i<data.length;i++){
+    						$("#viewTable").append("<tr><td>"+data[i].accountName+"</td><td>"+data[i].currencyCode+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].fcPrevBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].fcClosingBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].prevBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].closingBalance,'@session.get("exponent")')+"</td></tr>");
+        		      	}
+    			}else{
+    				$('#submitbtn').show();
+    					for(var i=0;i<data.length;i++){
+    						$("#viewTable").append("<tr><td>"+data[i].accountName+"</td><td>"+data[i].currencyCode+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].fcClosingBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].fcPrevBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].closingBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(data[i].prevBalance,'@session.get("exponent")')+"</td></tr>");
+    		      		}
+    			}
+				
+    			$('.amtValue').autoNumeric('init');
+ 				$('.amtValue').autoNumeric('update');
+ 				$('#viewModal').modal();
+    		}
+    		else{
+    			$('#currencynodata').remove();
+				$('#viewTable').append('<tr><td id="currencynodata" colspan="7">No data available</td></tr>');
+			}
+    	}
+		});
+}
+</script>

@@ -1,0 +1,107 @@
+
+@(loginError:String)
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<script src="@routes.Assets.versioned("js/jquery-3.2.1.min.js")"></script>
+	<script src="@routes.Assets.versioned("js/style.js")"></script>
+	<link href="@routes.Assets.versioned("assets/font-awesome/css/font-awesome.css")" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
+	<link href="@routes.Assets.versioned("stylesheets/util.css")" rel="stylesheet">
+	<link href="@routes.Assets.versioned("stylesheets/style.css")" rel="stylesheet">
+		<script src="@routes.Assets.versioned("bs3/js/bootstrap.min.js")"></script>
+	<link href="@routes.Assets.versioned("bs3/css/bootstrap.min.css")" rel="stylesheet"> 
+</head>
+<body>
+	
+	<div class="limiter">
+		<div class="container-login100" style="background-image: url('@routes.Assets.versioned("images/bg-01.jpg")');">
+			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+				<form id="login-form" class="login100-form validate-form">
+					<span class="login100-form-title p-b-49">
+						Login
+					</span>
+
+					<div class="wrap-input100 validate-input m-b-23" id="user-error" data-validate = "Username is required">
+						<span class="label-input100">Username</span>
+						<input class="input100" type="text" id="username" onfocus="typeUsername()" name="loginId" placeholder="Type your username">
+						<span class="focus-input100" data-symbol="&#xf206;"></span>
+					</div>
+					<div class="text-right p-b-1 userError">
+						<span style="color:red;display:none;">Invalid Username</span>
+					</div>
+
+					<div class="wrap-input100 validate-input"  id="pass-error" data-validate="Password is required">
+						<span class="label-input100">Password</span>
+						<input class="input100" type="password" id="password"  name="password" onfocus="typePassword()" placeholder="Type your password">
+						<span class="focus-input100" data-symbol="&#xf190;"></span>
+					</div>
+					
+					<div class="text-right p-t-8 p-b-31">
+					<span class="passError" style="color:red;display:none;">Invalid password</span>
+					<span class="userPassError" style="color:red;display:none;">Invalid Username/password</span>
+					</div>
+					
+					<div class="container-login100-form-btn">
+						<div class="wrap-login100-form-btn">
+							<div class="login100-form-bgbtn"></div>
+							<button class="login100-form-btn" type="button" onclick="loginSubmit()">Login</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
+
+<script>
+	$(function(){
+		$('.passError').hide();
+		$('.userError').hide();
+		if('@loginError'==""){
+			$('.userPassError').hide();
+		}else{
+			$('.userPassError').show();	
+		}
+		
+		$("input").on('input',function(){
+			$(this).removeClass('error');
+			$(this).closest('div').next().addClass('aff-display-none');
+		});
+		 $("input").keypress(function(event) {
+		    if (event.which == 13) {
+		        event.preventDefault();
+		        loginSubmit();
+		    }
+		});
+	});
+	
+	function loginSubmit(){
+		if($('#username').val()=="" && $('#password').val()==""){
+			$('#user-error').addClass('alert-validate');
+			$('#pass-error').addClass('alert-validate');
+			return;
+		}
+		else if($('#username').val()==""){
+			$('#user-error').addClass('alert-validate');
+			return;
+		}else if($('#password').val()==""){
+			$('#pass-error').addClass('alert-validate');
+			return;
+		}
+			$('#login-form').attr("action","/login");
+			$('#login-form').submit();
+	}
+	
+	function typeUsername(){
+		$('#user-error').removeClass('alert-validate');
+	}
+	function typePassword(){
+		$('#pass-error').removeClass('alert-validate');
+	}
+	
+	</script>

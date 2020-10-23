@@ -1,0 +1,308 @@
+@(viewType : String)
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Exchange Rate</a></li>
+        </ol>
+    </div>
+</div>
+<style>
+.error{
+color: red;
+}
+</style>
+<form class="form-horizontal" method="POST" id="exchangeRate">
+ <div class="row">
+	<div class="form-group">
+		<label class="control-label col-md-2 right-align-text">From Currency</label>
+		<div class="col-md-2">	
+			<input type="text"  class="form-control fromcurrency" id="frmcurrency" name="frmCurrency" onfocusout="currencyFocusOut(this,'tocurrcy')" placeholder="Search From Currency">
+        </div>
+        <label class="control-label col-md-2 right-align-text">To Currency</label>
+        <div class="col-md-2">	
+        	<input type="text"  class="form-control tocurrency" name="tCurrency" id="tocurrcy" onfocusout="currencyFocusOut(this,'frmcurrency')" placeholder="Search To Currency">
+        </div>
+	</div>
+</div>
+
+     <div class="row">
+	<div class="col-md-12" style="text-align">
+	@if(!viewType.equals("1")){
+		<a class="btn btn-primary aff-tr-blue" id="createbtn" type="submit" onclick="addRow()"> Add <i class="fa fa-plus-square"></i></a>
+		 <button type="button" onclick="refresh()" class="btn btn-dark"><i class="fa fa-refresh"></i> Reset</button>
+<span style="color:red;" class="help-block"> </span>
+	}
+ 	</div>
+</div>
+<div class="row">
+<div class="col-md-12">
+	<table class="table table-bordered" id="exchangetable">
+		<thead>
+	 <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+	 <th class="col-md-2"><i class="fa fa-money"></i> From Currency </th>
+	 <th class="col-md-2"><i class="fa fa-money"></i> To Currency </th>
+	 <th class="col-md-2"><i class="fa fa-exchange"> </i> Exchange Rate Multiply</th>
+	 <th class="col-md-2"><i class="fa fa-stack-exchange"></i> Reverse Exchange Rate Divided</th>
+				@if(!viewType.equals("1")){
+				<th class="col-md-1"><i class="fa fa-cogs"></i> Action</th>
+				}
+			</tr>
+ 		</thead>
+	</table>
+</div>
+</div>
+<div class="row">
+<div align="center" class="col-md-12">
+	<button class="btn btn-success" id="submitbtn" type="button" onclick="submitExchange()"><i class="fa fa-check"></i>Submit</button>
+	<a href="/viewExchange" class="btn btn-danger cancel" id="cancelbtn" ><i class="fa fa-times"></i>Cancel</a>
+</div>
+</div>
+<div id="finalValues" style="display: none;"></div>
+</form>
+@views.html.modal() @views.html.TransferReportModal()
+@views.html.commonJs()
+<script>
+ $(function(){
+	 $('input[name=frmCurrency]').focus();
+	 @if(!viewType.equals("1")){
+	 	for(var i=0;i<3;i++){
+			addRow(i);
+		}
+	 }
+	 autocompleteInitialize('fromcurrency','searchCurrencyCode','accountBal','accountBal','getfromCurrency');
+	 autocompleteInitialize('tocurrency','searchCurrencyCode','accountBal','accountBal','getToCurrency');
+ });
+ 
+ function addRow(j){
+	 var id = "cloneBom"+new Date().getTime();
+	 var row='<tr class="maintable">'
+	 +'<td><input type="text" class="form-control fCurrency fromCurrency_'+j+'" autocomplete="off" placeholder="Search From Currency" name="fromCury_'+id+'"></td>'
+	 +'<td><input type="text" class="form-control tCurrency tocurrency_'+j+'" autocomplete="off" placeholder="Search To Currency" name="toCury_'+id+'"></td>'
+	 +'<td><input type="text" class="form-control text-right quantity multiply multiply_'+j+'" placeholder="Exchange Rate" name="exchangeMultiply_'+id+'"></td>'
+	 +'<td><input type="text" class="form-control text-right quantity divided divided_'+j+'" required="required" placeholder="Reverse Exchange Rate" name="exchangeDivied_'+id+'"></td>'
+	
+	 if(j!=0){
+		 row=row+'<td><span onclick="deleteRow(this)"><i class="fa fa-times aff-action delete" title="Delete"></i></span></td>';}
+	    row=row+'<span>';
+	 +'</tr>';
+	 $('#exchangetable').append(row);
+	 $('.quantity').autoNumeric('init',{mDec:@session.get("currencyExponent"),mRound: 's' });
+	 $('.quantity').autoNumeric('init',{mDec:@session.get("currencyExponent"),mRound: 's' });
+	 intilizSearch(j);
+ }
+ 
+ function intilizSearch(index){
+	 autocompleteInitialize('fromCurrency_'+index+'','searchCurrencyCode','currencyName','currencyId','getfromCurrency');
+	 autocompleteInitialize('tocurrency_'+index+'','searchCurrencyCode','currencyName','currencyId','getToCurrency');
+ }
+ 
+ function currencyFocusOut(data,id){
+	 if($(data).val() == ''){
+		 $('#'+id).attr('disabled',false);
+		 $('#exchangetable>tbody').html('');
+	 }
+ }
+ 
+ function deleteRow(data){
+	$(data).closest('tr').remove();
+ }
+ function refresh(){
+		location.reload();
+	}
+ function setNames(){
+	 var rows = '';
+	 var index= 0;
+	 $('#exchangetable>tbody').find('tr').each(function(){
+		if($(this).find('.fCurrency').val() != '' && $(this).find('.fCurrency').val() != $(this).find('.tCurrency').val()){ 
+			if(typeof $(this).attr('entityid') != 'undefined'){
+				rows +='<input type="hidden" name="exchangerates['+index+'].exchangeRateId" value="'+$(this).attr('entityid')+'">'; 
+			}
+			rows +='<input type="hidden" name="exchangerates['+index+'].fromCurrency.currencyId" value="'+$(this).find('.fCurrency').next('div').find('[name=currencyId]').val()+'">' 
+				+'<input type="hidden" name="exchangerates['+index+'].toCurrency.currencyId" value="'+$(this).find('.tCurrency').next('div').find('[name=currencyId]').val()+'">'
+				+'<input type="hidden" name="exchangerates['+index+'].exchangeRateMultiply" value="'+addExponentToAmount($(this).find('.multiply').autoNumeric('get'),@session.get("currencyExponent"))+'">'
+				+'<input type="hidden" name="exchangerates['+index+'].exchangeRateDivided" value="'+addExponentToAmount($(this).find('.divided').autoNumeric('get'),@session.get("currencyExponent"))+'">';
+			index++;
+		}
+	 });
+	 $('#finalValues').html('').append(rows);
+ }
+ 
+ function validation(){
+	 var validationFlag = true;
+	 $('#exchangetable>tbody').find('tr').each(function(){
+            if($(this).find('.fCurrency').val() != '' || $(this).find('.tCurrency').val() != ''){
+			 if($(this).find('.fCurrency').val() == ''){
+				 $('#'+$(this).find('.fCurrency').attr('name')).remove();
+				 $(this).find('.fCurrency').after('<label class="error" id="'+$(this).find('.fCurrency').attr('name')+'" style="display: inline-block;">This field is required</label>');
+				 validationFlag = false;
+				 errorMessage($(this).find('.fCurrency').attr('name'));
+			 }
+			 if($(this).find('.fCurrency').val() =='' && ($(this).find('.tCurrency').val() =='' && ($(this).find('.multiply').val()=='' && ($(this).find('.divided').val()=='')))){ 
+					 validationFlag = false;
+					    $('.help-block').html('Please Enter The Details All Fields!');
+						$('.help-block').fadeIn(1000);
+						$('.help-block').fadeOut(5000);
+					 }   
+				 else if($(this).find('.fCurrency').val() == $(this).find('.tCurrency').val()){
+					 validationFlag = false;
+					    $('.help-block').html('FromCurrency And ToCurrency Should not be Same!');
+						$('.help-block').fadeIn(1000);
+						$('.help-block').fadeOut(5000);
+			 }
+			 if($(this).find('.tCurrency').val() == ''){
+				 $('#'+$(this).find('.tCurrency').attr('name')).remove();
+				 $(this).find('.tCurrency').after('<label class="error" id="'+$(this).find('.tCurrency').attr('name')+'" style="display: inline-block;">This field is required</label>');
+				 validationFlag = false;
+				 errorMessage($(this).find('.tCurrency').attr('name'));
+			 }
+			 if(typeof $(this).find('.multiply').autoNumeric('get') == 'undefined' || $(this).find('.multiply').autoNumeric('get') == ''){
+				 $('#'+$(this).find('.multiply').attr('name')).remove();
+				 $(this).find('.multiply').after('<label class="error" id="'+$(this).find('.multiply').attr('name')+'" style="display: inline-block;">This field is required</label>');
+				 validationFlag = false;
+				 errorMessage($(this).find('.multiply').attr('name'));
+			 }
+			 if(typeof $(this).find('.divided').autoNumeric('get') == 'undefined' || $(this).find('.divided').autoNumeric('get') == ''){
+				 $('#'+$(this).find('.divided').attr('name')).remove();
+				 $(this).find('.divided').after('<label class="error" id="'+$(this).find('.divided').attr('name')+'" style="display: inline-block;">This field is required</label>');
+				 validationFlag = false;
+				 errorMessage($(this).find('.divided').attr('name'));
+			 }
+		 }
+	 });
+	 return validationFlag;
+ }
+ 
+ function errorMessage(id){
+	$('#'+id).show();
+	window.setTimeout(function() {
+		$('#'+id).hide();
+	}, 2000);
+}
+ 
+ function submitExchange(){
+	if(!validation()){
+		return false;	
+	}
+	 setNames();
+	@if(!viewType.equals("1")){
+		$('#exchangeRate').attr('action','/addExchange');
+	}else{
+		$('#exchangeRate').attr('action','/updateExchange');
+	}
+	if($('#finalValues').find('input').length>0){
+		$('#exchangeRate').submit();
+	}
+}
+
+function getfromCurrency(){
+	  $.ajax({
+			type: "POST",
+	    	url: "/setCurrencyValues",
+	    	data:'primaryKey=&value1='+$('.id_fromcurrency').val(),
+	    	dataType: "json",
+	    	success: function(data){
+	    		  if(data.length==0){
+	    			  $('.maintable').show();
+	    		    }
+	    		  else{
+	    			  $('.maintable').hide();
+	    		    }
+	    		  $.each(data,function(i){
+	    		    $("#exchangetable").append('<tr class="maintable" entityid="'+data[i].exchangeRateId+'">' 
+       					+'<td><input type="text" class="form-control fCurrency fromCurrency_'+i+'" disabled id="fCurrency" autocomplete="off" placeholder="Search From Currency" value="'+data[i].fromCurrencyName+'" >'
+       						+'<div id="temp_fromCurrency_'+i+'" class="search-div aff-dispaly-none">'
+       							+'<input type="text" class="name_fromCurrency_'+i+'" name="currencyName" value="'+data[i].fromCurrencyName+'">'
+       							+'<input type="text" class="id_fromCurrency_'+i+'" name="currencyId" value="'+data[i].fromCurrencyId+'">'
+       						+'</div>'
+       					+'</td>'
+       					+'<span style="color:red;" class="help-block-exchange"> </span>'
+       					+'<td><input type="text" class="form-control tCurrency tocurrency_'+i+'" disabled id="tCurrency" autocomplete="off" placeholder="Search To Currency" value="'+data[i].toCurrencyName+'">'
+       						+'<div id="temp_toCurrency_'+i+'" class="search-div aff-dispaly-none">'
+       							+'<input type="text" class="name_toCurrency_'+i+'" name="currencyName" value="'+data[i].toCurrencyName+'">'
+       							+'<input type="text" class="id_toCurrency_'+i+'" name="currencyId" value="'+data[i].toCurrencyId+'">'
+       						+'</div>'
+       					+'</td>'
+       					+'<td><input type="text" class="form-control text-right quantity multiply multiply_'+i+'" placeholder="Exchange Rate"  value="'+removeExponentFromAmount(data[i].exchangeRateMultiply,@session.get("currencyExponent"))+'"></td>'
+       					+'<td><input type="text" class="form-control text-right quantity divided divided_'+i+'" placeholder="Reverse Exchange Rate" value="'+removeExponentFromAmount(data[i].exchangeRateDivided,@session.get("currencyExponent"))+'"></td>'
+       					
+       					+'@if(!viewType.equals("1")){<td><span onclick="deleteRow(this)"><i class="fa fa-times aff-action delete" title="Delete"></i></span></td>}'
+       					+'</tr>');
+	    		    intilizSearch(i);
+	    		       $('.quantity').autoNumeric('init',{mDec:@session.get("currencyExponent"),mRound: 's' });
+	    			   $('.quantity').autoNumeric('init',{mDec:@session.get("currencyExponent"),mRound: 's' });
+	    		       $('.ui-helper-hidden-accessible').remove();
+	    		    i++;
+	    		    });
+	    			
+	    		        if(data.length==0){
+	    		        	$('.maintable').hide();
+	    			        var noData='<tr id="noData"><td class="dataTables_empty"  colspan="7">@Messages("No Data Available in Table")</td></tr>';
+	    		     	    $('#exchangetable').append(noData);
+	    			     }
+	    	    	 
+	        }
+	     });
+	   if($('#frmcurrency').val() != ""){
+			$('#tocurrcy').attr('disabled',true);	
+		 } 
+    } 
+  function getToCurrency(){
+	  $.ajax({
+			type: "POST",
+	    	url: "/setCurrencyValues",
+	    	data:'primaryKey=&value2='+$('.id_tocurrency').val(),
+	    	dataType: "json",
+	    	success: function(data){
+	    		  if(data.length==0){
+	    			  $('.maintable').show();
+	    		    }
+	    		  else{
+	    			  $('.maintable').hide();
+	    		    }
+	    		$.each(data,function(i){
+            	   $("#exchangetable").append('<tr class="maintable">' 
+       					+'<td><input type="text" class="form-control fCurrency fromCurrency_'+i+'" id="fCurrency" disabled autocomplete="off" placeholder="Search From Currency" value="'+data[i].fromCurrencyName+'" >'
+       						+'<div id="temp_fromCurrency_'+i+'" class="search-div aff-dispaly-none">'
+       							+'<input type="text" class="name_fromCurrency_'+i+'" name="currencyName" value="'+data[i].fromCurrencyName+'">'
+       							+'<input type="text" class="id_fromCurrency_'+i+'" name="currencyId" value="'+data[i].fromCurrencyId+'">'
+       						+'</div>'
+       					+'</td>'
+       					+'<span style="color:red;" class="help-block-exchange"> </span>'
+       					+'<td><input type="text" class="form-control tCurrency tocurrency_'+i+'" id="tCurrency" disabled autocomplete="off" placeholder="Search To Currency" value="'+data[i].toCurrencyName+'">'
+       						+'<div id="temp_toCurrency_'+i+'" class="search-div aff-dispaly-none">'
+       							+'<input type="text" class="name_toCurrency_'+i+'" name="currencyName" value="'+data[i].toCurrencyName+'">'
+       							+'<input type="text" class="id_toCurrency_'+i+'" name="currencyId" value="'+data[i].toCurrencyId+'">'
+       						+'</div>'
+       					+'</td>'
+       					+'<td><input type="text" class="form-control text-right quantity multiply multiply_'+i+'" placeholder="Exchange Rate"  value="'+removeExponentFromAmount(data[i].exchangeRateMultiply,@session.get("currencyExponent"))+'"></td>'
+       					+'<td><input type="text" class="form-control text-right quantity divided divided_'+i+'" placeholder="Reverse Exchange Rate" value="'+removeExponentFromAmount(data[i].exchangeRateDivided,@session.get("currencyExponent"))+'"></td>'
+       					+'@if(!viewType.equals("1")){<td><span onclick="deleteRow(this)"><i class="fa fa-times aff-action delete" title="Delete"></i></span></td>}'
+       					+'</tr>');
+            	   intilizSearch(i);
+            	   $('.quantity').autoNumeric('init',{mDec:@session.get("currencyExponent"),mRound: 's' });
+            	   $('.quantity').autoNumeric('init',{mDec:@session.get("currencyExponent"),mRound: 's' });
+            	   $('.ui-helper-hidden-accessible').remove();
+	    		   i++;
+               });
+	    		if($('#exchangetable tbody tr').length==0){
+	    			for(var i=0;i<3;i++){
+	    				addRow(i);
+	    			}
+	    		}
+		        if($('#exchangetable tbody tr').length==0){
+		        	$('.maintable').hide();
+			        var noData='<tr id="noData"><td class="dataTables_empty"  colspan="7">@Messages("No Data Available in Table")</td></tr>';
+		     	    $('#exchangetable').append(noData);
+	    		}
+	    		 
+	    	}
+	     });
+	  	if($('#tocurrcy').val() != ""){
+			$('#frmcurrency').attr('disabled',true);	
+		}
+	}
+ </script>
+}
+ 

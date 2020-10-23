@@ -1,0 +1,22 @@
+<div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" id="alert-modal">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true"></span></button>
+        <h4 class="modal-title" id="myModalLabel"></h4>
+      </div>
+      <div class="modal-footer" style="margin-top: auto;">
+        <button type="button" class="btn btn-primary" id="confirmSubmit">Yes</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function alertModal(data,text){
+$('#alert-modal').modal();
+$('#myModalLabel').html('Do you want to '+text+'?');
+$('#confirmSubmit').attr('onclick',data+'()');
+}
+</script>

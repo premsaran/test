@@ -1,0 +1,14 @@
+@()
+@import java.lang.String; var loginId ={session.get("userName")}
+@import entity.RolePermissions; var menu={play.cache.Cache.get(loginId+"_menus").asInstanceOf[java.util.List[entity.RolePermissions]]}
+
+<ul class="sidebar-menu side-menu-background" id="nav-accordion">
+		@for(role<-menu){
+                  <li class="sub-menu wizard">
+                     <a href="@role.getMenu().getUrl()">
+                     <i class="@role.getMenu().getFontAwesomeName()"></i>
+                     <span>@role.getMenu().getMenuName()</span>
+                     </a>
+                  </li>
+                  }
+</ul>

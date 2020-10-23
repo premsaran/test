@@ -1,0 +1,324 @@
+@(account:List[entity.Account],currency:List[entity.Currency],accountBal:List[entity.AccountBalance])
+@views.html.main(){
+<div class="row">
+   <div class="col-md-12">
+      <ol class="breadcrumb breadcrumb-txt-size">
+         <li><a href="#">Home</a></li>
+         <li><a href="#">Opening Balance</a></li>
+         <li class="active"><a href="#">Create Opening Balance</a></li>
+      </ol>
+   </div>
+</div>
+
+<form class="form-horizontal" id="accountBalanceForm" action="/saveAccountBalance" method="POST">
+   
+   <div class="row">
+         <div class="form-group">
+            <label class="control-label col-md-2 right-align-text">Account Name</label>
+            <div class="col-md-2">	
+              <input type="text"  class="form-control account" id="account" name="test" placeholder="Search Account" onfocusout="accountFun(this)" onchange="changeCurrency(this)">
+            </div>
+            
+            <label class="control-label col-md-2 right-align-text">Currency Name</label>
+            <div class="col-md-2">	
+               <input type="text"  class="form-control currency" name="test2" id="currency" placeholder="Search Currency" onfocusout="currencyFun(this)" style="margin-top:0px;">
+            </div>
+         </div>
+  </div>
+   <button class="btn aff-tr-blue aff-txt-silver" type="button" onclick="addAccount()">Add <i class="fa fa-plus-square"></i></button>
+   <span class="accountError" style="color:red;display:none;">Empty Account Not Allowed</span>
+   <span class="currencyError" style="color:red;display:none;">Empty Currency Not Allowed</span>
+   <span class="balanceError" style="color:red;display:none;">Check Opening Balance</span>
+   <span class="userError" style="color:red;display:none;"></span>
+   </br>
+ 
+   <div class="row">
+    <div class="col-md-12">
+          <table class="table table-bordered" id="openingBalance">
+		<thead>
+           <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+            <th>Account Name</th>
+            <th>Currency</th>
+            <th>Local Opening Balance</th>
+            <th>FC Opening Balance</th>
+            <th>Action</th>
+            </tr>
+            <thead>
+            </table>
+         </div>
+     </div>
+    <div class="accountRow">
+   </div>
+   </br>
+   <div align="center">
+      <button  type="button" class="btn btn-primary submitBtn" onclick="validFun()"><i class="fa fa-check"></i> Submit</button>
+      <button  type="button" class="btn btn-danger cancelBtn" onclick="alertModal('cancel','cancel')"><i class="fa fa-times"></i> Cancel</button>
+   </div>
+   <div class="finalValues" style="display:none"></div>
+</form>
+  
+<form class="form-horizontal" id="accountCancelForm" action="/viewAccountBalanceList" method="GET">
+</form>
+@views.html.alertModal()
+@views.html.commonJs()
+<script>
+var j=0;
+
+var accountBal=[];
+$(function() {
+	$('input[name=test]').focus();
+	$.extend($.fn.autoNumeric.defaults,
+	{
+		aSep: ',',              
+		aDec: '.' ,
+        mDec: '@session.get("exponent")',
+        dGroup: '3',	
+        vMin: -999999999.99,
+        vMax: 99999999999999.9999
+	}); 
+	$('.amtValue').autoNumeric('init');
+	$('.amtValue').autoNumeric('update');
+	
+	autocompleteInitialize('currency','searchCurrencyCode','accountBal','accountBal','getCurrency');
+	autocompleteInitialize('account','searchAccountName','accountBal','accountBal','getAccount');
+	
+	 for(var i=0;i<3;i++){
+		addAccount();
+	} 
+	 
+	$("#currency option:last-child").hide();
+	
+});
+
+function addAccount() {
+	var currencyDisable="";
+	var accountDisable="";
+	if($('.account').val() != ""){
+		accountDisable="disabled";
+	}
+	if($('.currency').val() != ""){
+		currencyDisable="disabled";
+	}
+	
+	var row= '<tr class="maintable">'
+			+'<td><select class="form-control account accountId_'+j+'" id="account" onchange="changeCurrency(this)"  onfocusout="checkAccountId(this)">'
+			+'<option value="">--select--</option>'
+			+'@for(acountName <- account){'
+			+'<option value="@acountName.getAccountId()">@acountName.getAccountName()</option>'
+			+'}'
+			+'</select>'
+			+' <input type="hidden" id="account" class="hiddenFAmount_'+j+'" name="account"></td>'
+			+'<td><select class="form-control currency currencyId_'+j+'" id="currency" style="margin-top: 0px;" onfocusout="checkAccountId(this)">'
+			+'<option value="">--select--</option>'
+			+'@for(acname <- currency){'
+			+'<option value="@acname.getCurrencyId()">@acname.getCurrencyCode()</option>'
+			+'}'
+			+'<option value="@session.get("currencyId")"></option>'
+			+'</select>'
+			+' <input type="hidden" class="hiddenFAmount_'+j+'" id="currency"  name="account"></td>'
+			+'<td><input type="text"  class="form-control text-right amtValue openingBalAmt amount_'+j+'" placeholder="0.00" onfocus="emptyField(this)">'
+			+'<input type="hidden" class="hiddenAmount_'+j+'"></td>'
+			+'<input type="hidden" class="tenantId_'+j+'" value="@session.get("tenantId")"></td>'
+			+'<td><input type="text"  class="form-control text-right amtValue fOpeningBalAmt famount_'+j+'" placeholder="0.00" onfocus="emptyField(this)">'
+			+'<input type="hidden" class="hiddenFAmount_'+j+'"></td>'
+			if(j!=0){
+				row=row+'<td><div class="col-md-1 remove"><i class="fa fa-times" onclick="deleteRow(this)" title="Delete"></i></a></div></td>';
+			}
+	         
+	     row=row+'</div>';
+	  +'</tr>';
+	 $('#openingBalance').append(row);
+	 
+
+	
+	$('.amount_'+j).autoNumeric('init');
+	$('.amount_'+j).autoNumeric('update');
+	$('.amount_'+j).autoNumeric('set',0);
+	$('.famount_'+j).autoNumeric('init');
+	$('.famount_'+j).autoNumeric('update');
+	$('.famount_'+j).autoNumeric('set',0);
+	 j++;
+}
+var row = '';
+function setName(){
+	debugger
+	var index= 0;
+	 $("tr.maintable").each(function() {
+		    if($(this).find('.account').val()!='' && $(this).find('.currency').val()!=''){
+		    	row=row + '<input type="hidden" id="account" class="" value="'+$(this).find('.account').val()+'" name="accountBalance['+index+'].account.accountId">'
+		    	   +'<input type="hidden" id="currency" value="'+$(this).find('.currency').val()+'" name="accountBalance['+index+'].currency.currencyId">'
+		    	   +'<input type="hidden"  class="form-control text-right amtValue" value="'+addExponentToAmount(Number($(this).find('.openingBalAmt').autoNumeric('get')),@session.get("exponent"))+'" name="accountBalance['+index+'].openingBalance">'
+		    	   +'<input type="hidden"  class="form-control text-right amttValue" value="'+addExponentToAmount(Number($(this).find('.fOpeningBalAmt').autoNumeric('get')),@session.get("exponent"))+'" name="accountBalance['+index+'].fOpeningBalance" >'
+		    	   +'<input type="hidden"  class="tenantId" name="accountBalance['+index+'].tenant.tenantId" value="'+@session.get("tenantId")+'">';
+		    	   index++;
+		    }
+			
+		    });
+	 $('.finalValues').html('').append(row);
+	 }
+function deleteRow(data){
+	$(data).closest('tr').remove();
+}
+function cancel() {
+	$('#accountCancelForm').submit();
+}
+function validFun(){
+for(var k=0;k<=j;k++){
+	if($('.accountId_'+k).val() == ""){
+		$('.accountError').fadeIn();
+		$('.accountError').fadeOut(3000);
+		return false;
+	} 
+	if($('.currencyId_'+k).val() == ""){
+		$('.currencyError').fadeIn();
+		$('.currencyError').fadeOut(3000);
+		return false;
+	} 	
+	if(typeof $('.amount_'+k).val()!='undefined' && $('.amount_'+k).autoNumeric('get') == 0 && $('.famount_'+k).autoNumeric('get') == 0 ){
+		$('.userError').html('');
+		$('.userError').html('Fill Opening Amount...').fadeIn();
+		$('.userError').html('Fill Opening Amount...').fadeOut(5000);
+		return false;
+	}
+}
+setName();
+alertModal('submitFun','submit');
+}
+
+function submitFun() {
+	
+	var count=0;
+	$('#accountBalanceForm').submit();
+}
+	
+function getCurrency(data,className){
+	var count=0;
+	for(var k=0;k<=j;k++){
+		if(typeof $('.currencyId_'+k).val() != 'undefined' && $('#currency').val() != "") {
+			 $('.currencyId_'+k).val(data.label);
+			 $('.currencyId_'+k).attr("disabled",true); 
+			 $('#temp_currencyId_'+k).remove();                
+	            $('.currencyId_'+k).after("<div id='temp_currencyId_"+k+"' class='search-div aff-dispaly-none'>"
+	            				+"<input type='text' class='name_currencyId_"+k+"' name='accountBalance["+k+"].currency.currencyName' value='"+data.label+"'>"
+	            				+"<input type='text' class='id_currencyId_"+k+"' name='accountBalance["+k+"].currency.currencyId' value='"+data.value+"'>"
+	            				+"</div>");
+	        }
+	    }
+   for(var k=0;k<=j;k++){
+	if(typeof $('.currencyId_'+k).val() != 'undefined') {
+	  $('.currencyId_'+k).find('option[value='+data.value+']').prop('selected',true).change();
+	   } 
+	  }
+  if($('#currency').val() != ""){
+	$('#account').attr("disabled",true);	
+	} 
+ }
+
+
+function getAccount(data,className) {
+	var count=0;
+	 for(var k=0;k<=j;k++){
+		if(typeof $('.accountId_'+k).val() != 'undefined' && $('#account').val() != "" ) {
+			 $('.accountId_'+k).val(data.label);
+		     $('.accountId_'+k).attr("disabled",true); 
+			 $('#temp_accountId_'+k).remove();                
+	            $('.accountId_'+k).after("<div id='temp_accountId_"+k+"' class='search-div aff-dispaly-none'>"
+	            				+"<input type='text' class='name_currencyId_"+k+"' name='accountBalance["+k+"].account.accountName' value='"+data.label+"'>"
+	            				+"<input type='text' class='id_currencyId_"+k+"' name='accountBalance["+k+"].account.accountId' value='"+data.value+"'>"
+	                            +"</div>");
+	    } 
+	 }
+	 if(data.value=="@session.get("currencyId")"){
+	 
+	 $('.'+className).closest('td').next('td').find('input').val("@session.get("currencyName")");
+	  
+	} 
+ for(var k=0;k<=j;k++){
+   if(typeof $('.accountId_'+k).val() != 'undefined') {      
+     $('.accountId_'+k).find('option[value='+data.value+']').prop('selected',true).change();
+	  } 
+	}
+  if($('#account').val() != ""){
+   $('#currency').attr("disabled",true);	
+	}  
+ }
+function accountFun(data){
+	var value = $(data).val();
+	if(value != "") {
+		var selectedName = $(data).next('div').children('input:eq(0)').val();
+		if(selectedName) {
+			if(value != selectedName) {
+				$(data).val(selectedName);	
+			}
+		 }else {
+				$(data).val('');
+		 }
+		/* $('.currency').attr("disabled",true); */
+	} else {
+		for(var k=0;k<=j;k++){
+			if(typeof $('.accountId_'+k).val() != 'undefined') {
+				 $('.accountId_'+k).val('');
+				 $('.accountId_'+k).attr("disabled",false);
+			} 
+		}
+		$('.account').attr("disabled",false);
+		 $('.currency').attr("disabled",false);
+	}
+	
+}
+ 
+ function currencyFun(data) {
+	var value = $(data).val();
+	if(value != "") {
+		var selectedName = $(data).next('div').children('input:eq(0)').val();
+		if(selectedName) {
+			if(value != selectedName) {
+				$(data).val(selectedName);	
+			}
+		} else {
+				$(data).val('');
+		}
+		/* $('.account').attr("disabled",true); */
+	} else {
+		for(var k=0;k<=j;k++){
+			if(typeof $('.currencyId_'+k).val() != 'undefined') {
+				 $('.currencyId_'+k).val('');
+				 $('.currencyId_'+k).attr("disabled",false);
+			} 
+		}
+		 $('.account').attr("disabled",false);
+		 $('.currency').attr("disabled",false);
+	}
+}
+ 
+ function emptyField(data){
+		$(data).autoNumeric('init');
+		if($(data).autoNumeric('get')=="0"){
+		$(data).val("");
+		}
+	}
+ 
+ function changeCurrency(data){
+		if($(data).find('option:selected').text()=="@play.Play.application().configuration().getString("application.cash.accountId")"){
+			$(data).closest('td').next('td').find('#currency option:last-child').prop('selected',true).change();
+		}
+	}
+ function checkAccountId(data){
+		@for(accounts <- accountBal){
+			var flag=0;
+			if($(data).closest('tr').find('td').eq(0).find('select').val()=='@accounts.getAccount().getAccountId()') {
+				flag++;	
+			}
+			if($(data).closest('tr').find('td').eq(1).find('select').val()=='@accounts.getCurrency().getCurrencyId()'){
+				flag++;
+			}
+			if(flag==2){
+				$(data).val("");
+				$('.userError').html('');
+				$('.userError').html('Already Exists...Choose Different Account or Currency Name').fadeIn();
+				$('.userError').html('Already Exists...Choose Different Account or Currency Name').fadeOut(5000);
+			}}
+		}
+
+</script>
+}

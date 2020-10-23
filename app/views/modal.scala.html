@@ -1,0 +1,87 @@
+@()
+<!-- Modal -->
+  				<div class="modal fade" id="viewModal" role="dialog">
+    				<div class="modal-dialog modal-lg">
+  
+      				<!-- Modal content-->
+      				<div class="modal-content">
+        				<div class="modal-header">
+          					<button type="button" class="close" data-dismiss="modal">&times;</button>
+          					<div class="modal-title" align="center"><h4 class="col-md-10" style="margin-top: 7px;">Transaction Details</h4>
+          					<button class="btn btn-warning submit" align="text-right" onclick="downloadTransferReport1()" type="button"><i class="fa fa-download"></i></button>
+          					</div>
+          				</div>
+        				<div class="modal-body">
+          					<p id="view"></p>
+          					<table class="table" id="viewTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                                 <th>Account</th>
+                                 <th>Currency</th>
+								 <th class="text-right">FC Dr Amount</th>
+								 <th class="text-right">FC Cr Amount</th>
+								 <th class="text-right">FC Prev Balance</th>
+								 <th class="text-right">FC Balance</th>
+								 <th class="text-right">Dr Amount</th>
+								 <th class="text-right">Cr Amount</th>
+								 <th class="text-right">Prev Balance</th>
+								 <th class="text-right">Balance</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                          
+						   </tbody>
+                        </table>
+        				</div>
+        				<div class="modal-footer">
+          					
+        				</div>
+      				</div>  
+    				</div>
+  				</div>
+                  
+<script>
+var transids="";
+function openSysnModal(transid){
+	transids=transid;
+	 $.ajax({
+		type: "POST",
+    	url: "/viewTransBal",
+    	data:'primaryKey='+transid,
+    	dataType: "json",
+    	success: function(data){
+    		debugger
+    		console.log(data);
+    		if(data.length>0){
+    			$('#viewTable tbody tr').remove();
+				for(var i=0;i<data.length;i++){
+				$("#viewTable").append('<tr>'
+				+'<td>'+data[i].accountName+'</td>'
+				+'<td>'+data[i].currencyCode+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].fcDrAmount,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].fcCrAmount,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].fcPrevBalance,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].fcClosingBalance,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].drAmount,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].crAmount,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].prevBalance,'@session.get("exponent")')+'</td>'
+				+'<td class="text-right amtValue">'+removeExponentFromAmount(data[i].closingBalance,'@session.get("exponent")')+'</td>'
+				+'</tr>');
+    		      }
+    			$('.amtValue').autoNumeric('init');
+ 				$('.amtValue').autoNumeric('update');
+ 				$('#viewModal').modal();	
+    		}
+    		else{
+    			$('#currencynodata').remove();
+				$('#viewTable').append('<tr><td id="currencynodata" colspan="7">No data available</td></tr>');
+			}
+    	}
+		});
+}
+function downloadTransferReport1(){
+	downloadTransferReport(transids);
+}
+</script>
+
+

@@ -1,0 +1,350 @@
+@(userList:List[entity.User],statusList:List[entity.Status],tenantList:List[entity.Tenant])
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">User</a></li>
+        </ol>
+    </div>
+</div>
+
+        <!-- page start-->
+		
+		<button class="btn aff-tr-blue aff-txt-silver createUser" type="submit" onclick="createUser()">Create <i class="fa fa-plus-square"></i></button>
+		<div class="row" id="userList" >
+                     <div class="col-md-12">
+                        <table class="table table-bordered  table-hover table-striped" id="userTable">
+                           <thead>
+                              <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                                 <th><i class="fa fa-user"></i> User Name</th>
+                                 <th><i class="fa fa-bookmark"></i> Created By</th>
+                                 <th><i class="fa fa-bookmark"></i> Status</th>
+                                 <th><i class="fa fa-user"></i> Tenant Name</th>
+                                 <th><i class="fa fa-bookmark"></i> Updated By</th>
+                                 <th><i class="fa fa-bookmark"></i> Action</th>
+                              </tr>
+                           </thead>
+                           <tbody>
+                           @for(user <- userList){
+                           <tr>
+                           <input type="hidden" class="userID" value='@user.getUserId()'>
+                           <td>@user.getUserName()</td>
+                           <td>@user.getCreatedBy()</td>
+                           <td>@user.getStatus().getStatusName()</td>
+                           <td>@user.getTenant().getTenantName()</td>
+                           <input type="hidden" class="userStatus" value='@user.getStatus().getStatusId()'>
+                           <input type="hidden" class="userStatusName" value='@user.getStatus().getStatusName()'>
+                           <input type="hidden" id="tenantId" name="@user.getTenant().getTenantId()">
+                           <td>@user.getUpdatedBy()</td>
+                           <td><a href="#"  data-toggle="modal" onclick="changeStatus(this)"><span><i class="fa fa-slack" rel="tooltip" title="Change status" data-placement='bottom'></i></span></a>
+                           @if(user.getStatus().getStatusId().equals(play.Play.application().configuration().getString("application.status.active.id"))){
+                           <a href="#"  data-toggle="modal" onclick="viewMappingTenant(this)"><span><i class="fa fa-align-justify" rel="tooltip" title="Mapping Tenants" data-placement='bottom'></i></span></a>
+                           }</td>
+                           }
+						   </tbody>
+                        </table>
+                     </div>
+                  </div>
+                  
+                  <!-- Modal -->
+				<div class="modal fade" id="statusModal" role="dialog">
+					<div class="modal-dialog modal-md">
+
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" onclick="closeModal()">&times;</button>
+								<h4 class="modal-title" align="center">Change Status</h4>
+							</div>
+							<form id="status" action="/changeStatus" method="post">
+							<div class="modal-body">
+							<div class="col-md-8" style="margin-left: 103px;">
+								<input type="hidden" name="userId" id="setUserId">
+								<select id="statusId" class="form-control" name="status.statusId">
+                               </select>
+							</div>
+							</div>
+							<div class="modal-footer">
+							<button class="btn btn-success" type="submit"><i class="fa fa-check"></i> Change</button>
+							</div>
+							</form>
+						</div>
+					</div>
+				</div>
+				
+				<!-- mapping Tenants  -->
+				
+			<div class="modal fade" id="mappingModal" role="dialog">
+					<div class="modal-dialog modal-md">
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" onclick="closingModal()">&times;</button>
+								<h4 class="modal-title" align="center">Tenant Mapping</h4>
+							</div>
+							<form id="mapTenant" action="/changeMapingTenant" method="post" >
+							<div class="modal-body">
+                           		<div class="col-md-12" id="appendCheck">
+                           		</div>
+                           		<input type="hidden" class="userListId" id="mapUserId" name="userId.userId">
+                           		<input type="hidden" class="tenantListId" id="mapTenantId" name="tenant.tenantId">
+							</div>
+							<div class="modal-footer removeBorder">
+							<button class="btn btn-success" id="mapTenantBtn"><i class="fa fa-check"></i> Save</button>
+							</div>
+							</form>
+						</div>
+					</div>
+				</div>		
+				
+<div class="col-md-12" id="createUserForm" style="display:none">
+<form id="userForm" method="post">
+<div class="row">
+<div class="col-md-1">
+<button class="btn aff-tr-blue aff-txt-silver addUser" type="button" onclick="addUser()">Add <i class="fa fa-plus-square"></i></button>
+</div>
+<div class="col-md-4">
+<span class="userError" style="color:red;display:none;"></span>
+</div>
+</div>
+</br>
+    <div class="row">
+        <div class="form-group">
+			<div style="display: block">
+				<label class="control-label col-md-2">Login Id</label>
+			</div>
+			<div style="display: block">
+				<label class="control-label col-md-2">User Name</label>
+			</div>
+			<div style="display: block">
+				<label class="control-label col-md-2">Role</label>
+			</div>	
+			<div style="display: block">
+			 <label class="control-label col-md-2">Tenant Name</label>
+            </div>
+		</div>
+	</div>
+	<div class="userRow"></div>
+   <br><br>
+      <div align="center" class="col-md-6">
+         <button class="btn btn-primary submit" type="button" onclick="validUser()"><i class="fa fa-check"></i> Submit</button>
+         <button class="btn btn-danger cancel" onclick="alertModal('cancelUser','cancel')" type="button"><i class="fa fa-times"></i> Cancel</button>
+      </div>
+</form>
+<form id="updateUserForm" method="post">
+<div class="editUserValues"></div>
+</form>
+</div>
+@views.html.alertModal()
+@views.html.commonJs()
+<script>
+var loginId =[];
+var userName =[];
+$(function(){
+	
+	@for(login <- userList){	 
+		loginId.push('@login.getLoginId()');
+	}        
+	loginId.join(",");
+	
+	@for(login <- userList){	 
+		userName.push('@login.getUserName()');
+	}        
+	userName.join(",");
+	
+	$('#createUserForm').hide();
+	$("#userTable").dataTable({
+		 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+			  "iDisplayLength": 10
+	 });
+	$('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+   	if($('#userTable tbody tr').length<=10)
+	{   
+	   $('.next').attr('class','next disabled');
+   	}
+	$('#userTable_filter input').addClass('form-control');
+	$("#userTable_filter input").attr("placeholder", "Type here to search");
+	for(var i=0;i<3;i++){
+		addUser();
+	}
+});
+
+
+function getTenantSearch(data,className){
+	var count=0;
+	for(var k=0;k<=j;k++){
+		if(typeof $('.tenant_'+k).val() != 'undefined' && $('.tenant_'+k).val() != "") {
+			 $('#temp_tenant_'+k).remove();                
+	            $('.tenant_'+k).after("<div id='temp_tenant_"+k+"' class='search-div aff-dispaly-none'>"
+	            		        +"<input type='text' class='id_tenant_"+k+"' name='users["+k+"].tenant.tenantId' value='"+data.value+"'>"
+	            				+"</div>");
+	        }
+	    }
+   for(var k=0;k<=j;k++){
+	if(typeof $('.tenant__'+k).val() != 'undefined') {
+	  $('.tenant_'+k).find('option[value='+data.value+']').prop('selected',true).change();
+	   } 
+	  }
+ }
+function createUser() {
+	$('#createUserForm').show();
+	$('.cancel').show();
+	$('.submit').show();
+	$('.close1').hide();
+	$('.createUser').hide();
+	$('#userList').hide();
+	$('#userForm').show();
+}
+var removeStatus="";
+function changeStatus(data){
+	$('#setUserId').val($(data).closest('tr').find('.userID').val());
+	removeStatus=$(data).closest('tr').find('.userStatus').val();
+	if(removeStatus==@play.Play.application().configuration().getString("application.status.active.id")){
+		$("#statusId option").remove();
+		var option="<option value='@play.Play.application().configuration().getString("application.status.inactive.id")'>Inactive</option>";
+		$("#statusId").append(option);
+	}
+	else{
+		$("#statusId option").remove();
+		var option="<option value=@play.Play.application().configuration().getString("application.status.active.id")>Active</option>";
+		$("#statusId").append(option);
+	}
+	$('#statusModal').modal();
+}
+var usersId="";
+function viewMappingTenant(data){
+	var i=0;
+	usersId=$(data).closest('tr').find('.userID').val();
+	$('#setUserId').val(usersId);
+	var options="";
+	@for(tenant <- tenantList){
+		options = options + '<div class="col-md-3"><div class="checkbox checkbox-primary">'
+        	+'<input id="mappingTenantId_'+i+'" type="checkbox" name="tenantName" value="@tenant.getTenantId()">'
+        	+'<label for="mappingTenantId_'+i+'" id="@tenant.getTenantId()">@tenant.getTenantName()</label>'
+        	+'</div></div>';
+	      i++;
+	}
+	$('#appendCheck').html("");
+	$('#appendCheck').append(options);
+	$('#mappingModal').modal();
+	$('.removeBorder').css('border-top','unset');
+	
+	$.ajax({
+		type: "GET",
+    	url: "/getUserTenant?userId="+usersId+"",
+    	dataType: "json",
+    	success: function(data){
+    		for(var k=0;k<=i;k++){
+    			for(var j=0;j<data.length;j++){
+    				if($('#mappingTenantId_'+k).val()==data[j].tenant.tenantId)
+    					$('#mappingTenantId_'+k).prop('checked',true);
+    			}
+    		}
+    	}
+	});
+}
+$("#mapTenantBtn").click(function(){
+	var selectedTenant = "";
+	$('input[name="tenantName"]:checked').each(function() {
+		selectedTenant = selectedTenant + this.value + ",";
+	});
+	var deleteLastValue=selectedTenant.substring(0,selectedTenant.length-1);
+	$('#mapTenantId').val(deleteLastValue);
+	$('#mapUserId').val(usersId);
+	$('#mapTenant').submit();
+	
+});
+function closeModal(){
+	$('#statusModal').modal('hide');
+}
+function closingModal(){
+	$('#mappingModal').modal('hide');
+}
+function cancelUser() {
+	location.reload();
+}
+
+var j=0;
+function validUser(){
+for(var k=0;k<=j;k++){
+	if($('.validUserName_'+k).val() == "" || $('.validRole_'+k).val() == "" || $('.validUserId_'+k).val() == ""){
+		$('.userError').html('');
+		$('.userError').html('Empty Values Not Allowed').fadeIn();
+		$('.userError').html('Empty Values Not Allowed').fadeOut(5000);
+		return false;
+	}
+}
+alertModal('submitUser','submit');
+}
+
+function submitUser(){
+var count=0;
+for(var k=0;k<=j;k++){
+			 $('.validUserId_'+k).attr('name','users['+count+'].loginId');
+			 $('.validUserName_'+k).attr('name','users['+count+'].userName');
+			 $('.id_tenant_'+k).attr('name','users['+count+'].tenant.tenantId');
+			count++;
+	}
+	 $('#userForm').attr('action','/createUser');
+	 $('#userForm').submit();
+}
+
+ function addUser() {
+ var row='<div class="row margin-top-5px">'+
+         '<div class="form-group">'+
+		'<div class="col-md-2">'+
+		'<input type="hidden" name="users['+j+'].createdBy" value="@session.get("userName")">'+
+    	'<input type="hidden" name="users['+j+'].updatedBy" value="@session.get("userName")">'+
+			'<input type="text" class="form-control validUserId_'+j+'" placeholder="Enter Login Id" name="" onfocusout="checkLoginId(this)">'+
+		'</div>'+
+		'<div class="col-md-2">'+
+			'<input type="text" class="form-control validUserName_'+j+'" placeholder="Enter Username" name="users['+j+'].userName" onfocusout="checkUserName(this)">'+
+		'</div>'+
+		'<div class="col-md-2">'+
+		'<input type="text" class="form-control validRole_'+j+'" placeholder="Enter  Role" onfocusout="resetFromTo(this)">'+
+		'</div>'+
+		'<div class="col-md-2">'+
+		'<input type="text"  class="form-control tenant tenant_'+j+'" id="tenantId" placeholder="Search Tenant">'+
+		'</div>'+
+		'</div>';
+		if(j!=0) {
+			row=row+'<div class="col-lg-1 remove"><a href="#"><i class="fa fa-times" title="Delete"></i></a>';
+		}
+   row=row+'</div>';
+	$('.userRow').append(row);
+	
+	autocompleteInitialize('validRole_'+j+'','searchRoleName','users['+j+'].roleName','users['+j+'].role.roleId','get');
+	autocompleteInitialize('tenant_'+j+'','searchTenantName','users['+j+'].tenantId','users['+j+'].tenant.tenantId','getTenantSearch');
+	j++;
+}
+
+$(document).on('click','.remove',function() {
+	$(this).parent('div').remove();
+});
+
+function checkLoginId(data){
+	var length=loginId.length;
+	for(var i=0;i<length;i++){
+		if($(data).val()==loginId[i]){
+			$(data).val("");
+			$('.userError').html('');
+			$('.userError').html('Login Id Already Exists').fadeIn();
+			$('.userError').html('Login Id Already Exists').fadeOut(5000);
+		}	
+	}
+}
+
+function checkUserName(data){
+	var length=userName.length;
+	for(var i=0;i<length;i++){
+		if($(data).val().toLowerCase()==userName[i].toLowerCase()){
+			$(data).val("");
+			$('.userError').html('');
+			$('.userError').html('User Name Already Exists').fadeIn();
+			$('.userError').html('User Name Already Exists').fadeOut(5000);
+		}	
+	}
+}
+</script> 
+}

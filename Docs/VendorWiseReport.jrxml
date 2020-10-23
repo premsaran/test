@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="960" pageHeight="842" columnWidth="920" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2b42c13d-7974-4f94-85f8-48a6f58740bd">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="760"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="DR_TOT" class="java.lang.String"/>
+	<parameter name="CR_TOT" class="java.lang.String"/>
+	<parameter name="CURRENCY_NAME" class="java.lang.String"/>
+	<parameter name="TEST" class="java.lang.String"/>
+	<parameter name="F_DR_TOT" class="java.lang.String"/>
+	<parameter name="F_CR_TOT" class="java.lang.String"/>
+	<parameter name="OPENING_BALANCE_TOT" class="java.lang.String"/>
+	<parameter name="TOTAL_BALANCE" class="java.lang.String"/>
+	<field name="SNO" class="java.lang.String"/>
+	<field name="CUSTOMER" class="java.lang.String"/>
+	<field name="DR_AMT" class="java.lang.String"/>
+	<field name="CR_AMT" class="java.lang.String"/>
+	<field name="CURRENCY_NAME" class="java.lang.String"/>
+	<field name="F_CR_AMOUNT" class="java.lang.String"/>
+	<field name="F_DR_AMOUNT" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="F_OPNING_BALANCE" class="java.lang.String"/>
+	<field name="OPENING_BALANCE" class="java.lang.String"/>
+	<background>
+		<band height="802" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="910" height="802" uuid="a1260680-9011-4449-abd4-3036376f9ef9"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</frame>
+		</band>
+	</background>
+	<title>
+		<band height="65" splitType="Stretch">
+			<staticText>
+				<reportElement x="295" y="0" width="130" height="20" uuid="40adb13c-3f8a-47b2-bb9b-9110058182b3"/>
+				<textElement>
+					<font size="14" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Vendor Report]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="356" y="23" width="130" height="20" uuid="9d7f0d41-8795-48c4-b86d-ee40efef40a2"/>
+				<textFieldExpression><![CDATA[$P{CURRENCY_NAME}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="246" y="24" width="92" height="20" uuid="110c9ee5-dbe7-4110-b0bd-9330b74189f8"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Vendor Name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="342" y="24" width="10" height="20" uuid="17786470-7bc8-403d-aef2-eba1ee684a22"/>
+				<text><![CDATA[ :]]></text>
+			</staticText>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="910" height="20" backcolor="#CCCCCC" uuid="aebe1bd5-89fd-4483-802c-5f4ba43c7a6c"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<staticText>
+					<reportElement x="342" y="0" width="117" height="20" uuid="f688b043-1ace-4a65-a323-84afb3b7277a"/>
+					<box>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[FC Cr Amt]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="460" y="0" width="122" height="20" uuid="0840c201-dc12-45df-91e4-b7c8695925b8">
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					</reportElement>
+					<box>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[   FC Dr Amt]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="704" y="0" width="90" height="20" uuid="f476d242-b6ae-4a79-ab93-d28c21fc38a6"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Dr]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="113" y="0" width="100" height="20" uuid="defd67b7-632d-4ff1-8f83-1b970f0dc776"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Currency]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="5" y="0" width="108" height="20" uuid="85b9ac6e-f639-42f5-ba4e-066c3d543b06"/>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Customer]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="794" y="0" width="115" height="20" uuid="4cf055f3-67c8-4031-9483-08603e179213"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Cr]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="582" y="0" width="122" height="20" uuid="03dafba2-ca54-4526-9c60-74d6bb42e0ea">
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					</reportElement>
+					<box>
+						<rightPen lineWidth="0.0"/>
+					</box>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Opening Balance]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="213" y="0" width="125" height="20" uuid="4c97d45b-1b20-481c-bcdb-a66da850b6a4"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[FC Opening Balance]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="5" y="0" width="108" height="20" uuid="0c8955ac-4de0-45bc-9731-83a0beffa4d5">
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{CUSTOMER}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="704" y="0" width="90" height="20" uuid="00d4cda6-78a7-42a5-82ac-1368f8b5beb2"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{DR_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="113" y="0" width="100" height="20" uuid="747b619b-bfb9-487d-a3e7-f17f8536e370"/>
+				<textFieldExpression><![CDATA[$F{CURRENCY_NAME}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="342" y="0" width="118" height="20" uuid="5def68ae-ef4f-4853-b4e1-b9ceb02965d3">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{F_CR_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="460" y="0" width="122" height="20" uuid="921e7ca2-7028-4b57-ac75-d3995f2f9d8c">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+					<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{F_DR_AMOUNT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="794" y="0" width="116" height="20" uuid="0d290dc7-d367-4c1d-af34-98b5bc40967f">
+					<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CR_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="213" y="0" width="129" height="20" uuid="d8eb5b9b-45d7-40fa-b4b0-92c864171605"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{F_OPNING_BALANCE}]]></textFieldExpression>
+			</textField>
+			<textField isStretchWithOverflow="true" isBlankWhenNull="true">
+				<reportElement x="582" y="0" width="122" height="20" uuid="f549cc2e-3ed2-4ea3-bcf5-129f29a16afe"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{OPENING_BALANCE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="53" splitType="Stretch">
+			<frame>
+				<reportElement x="0" y="0" width="910" height="20" uuid="8f31f47b-72c9-4d04-880a-ab595519656c"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+				<staticText>
+					<reportElement x="113" y="0" width="100" height="20" uuid="bd0e14aa-db19-4416-9f32-c7ec43a48a97">
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle">
+						<font isBold="false"/>
+					</textElement>
+					<text><![CDATA[Total]]></text>
+				</staticText>
+				<textField isBlankWhenNull="true">
+					<reportElement x="704" y="0" width="90" height="20" uuid="7cabb159-14da-4353-97ab-1195f2012a3c"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$P{DR_TOT}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="794" y="0" width="116" height="20" uuid="5acf0b3b-41cd-4ae7-b236-0580f2b62317">
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					</reportElement>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$P{CR_TOT}]]></textFieldExpression>
+				</textField>
+				<textField isBlankWhenNull="true">
+					<reportElement x="582" y="0" width="122" height="20" uuid="4ca320d8-a446-4c8b-9eb4-198de2bf4048"/>
+					<textElement textAlignment="Right" verticalAlignment="Middle"/>
+					<textFieldExpression><![CDATA[$P{OPENING_BALANCE_TOT}]]></textFieldExpression>
+				</textField>
+			</frame>
+			<staticText>
+				<reportElement x="477" y="28" width="100" height="20" uuid="67cdeff5-4ed8-4dc1-8e4b-af34ef78ab84"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[TOTAL BALANCE]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="582" y="28" width="122" height="20" uuid="6d194317-ee3d-4ada-be6d-ae30a76309b7"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{TOTAL_BALANCE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

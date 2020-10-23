@@ -1,0 +1,169 @@
+@(accountBalanceList:List[entity.AccountBalance])
+@views.html.main(){
+<div class="row">
+   <div class="col-md-12">
+      <ol class="breadcrumb breadcrumb-txt-size">
+         <li><a href="#">Home</a></li>
+         <li class="active"><a href="#">Opening Balance</a></li>
+      </ol>
+   </div>
+</div>
+
+<button class="btn aff-tr-blue aff-txt-silver createAccountBalance" type="submit" onclick="createAccountBalance()">Create <i class="fa fa-plus-square"></i></button>
+<button class="btn aff-tr-blue aff-txt-silver createAccountBalance" id="editbtn" onclick="createAccountBalance()">Edit <i class="fa fa-pencil-square-o"></i></button>
+   <div class="row" id="currencyList" >
+      <div class="col-md-12">
+         <table class="table table-bordered  table-hover table-striped" id="accountTable">
+            <thead>
+               <tr style="background-color:#428bca;opacity: 0.9; color:#f9f9f9">
+                  <th><i class="fa fa-user"></i> Account Name</th>
+                  <th><i class="fa fa-bookmark"></i> Currency Name</th>
+                  <th> Local Opening Balance</th>
+                  <th> FC Opening Balance</th>
+                  <th> Action</th>
+               </tr>
+            </thead>
+            <tbody>
+               @for(account <- accountBalanceList){
+               <tr>
+                  <td>
+                     <div>@account.getAccount().getAccountName()</div>
+                  </td>
+                  <td >
+                     <div>@account.getCurrency().getCurrencyCode()</div>
+                  </td>
+                  <td>
+                  	<div class="openingBalance amtValue text-right EtExponent" value="@account.getOpeningBalance()"></div>
+                     <div class="editOpeningBalance" style="display:none"><input type="text"  class="openingBalanceText form-control amtValue text-right" value="@account.getOpeningBalance()" style="width: 100%">
+                        <input type="hidden"  class="accountBalanceId form-control" value="@account.getAccountBalanceId()">
+                        <input type="hidden"  class="crAmount form-control" value="@account.getCrAmount()">
+                        <input type="hidden"  class="drAmount form-control" value="@account.getDrAmount()">
+                        <input type="hidden"  class="fDrAmount form-control" value="@account.getFcDrAmount()">
+                        <input type="hidden"  class="fCrAmount form-control" value="@account.getFcCrAmount()">
+                        <input type="hidden"  class="creationDate form-control" value="@account.getCreationDate()">
+                        <input type="hidden"  class="accountId form-control" value="@account.getAccount().getAccountId()">
+                        <input type="hidden"  class="currencyId form-control" value="@account.getCurrency().getCurrencyId()">
+                        <input type="hidden" class="tenantId form-control" value="@account.getTenant().getTenantId()">
+                     </div>
+                  </td>
+                  <td>
+                     <div class="fopeningBalance amtValue text-right EtExponent" value="@account.getfOpeningBalance()"></div>
+                     <div class="feditOpeningBalance" style="display:none"><input type="text"  class="fopeningBalanceText form-control amtValue text-right" value="@account.getfOpeningBalance()" style="width: 100%">
+                     </div>
+                  </td>
+                  <td class="text-center accountActionBtn">
+                     <a href="#" class="editAccount" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement='bottom'></i></span></a>
+                  </td>
+               </tr>
+               }
+            </tbody>
+         </table>
+      </div>
+   </div>
+    <form class="form-horizontal" id="balanceListForm" action="/createAccountBalance" method="GET">
+	</form>
+	<form id="updateAccountForm" action="/updateAccountBalance" method="POST">
+	<div class="editAccountValues"></div>
+	</form>
+@views.html.commonJs()
+<script>
+$(function(){
+	   $.extend($.fn.autoNumeric.defaults,
+	{
+		aSep: ',',              
+		aDec: '.' ,
+        mDec: '@session.get("exponent")',
+        dGroup: '3',	
+        vMin: -99999999999999.9999,
+        vMax: 99999999999999.9999
+	});   
+	$('#accountTable').dataTable({
+		"aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+		"bSort": false,
+		"iDisplayLength": 10
+	 });
+	
+	
+	$('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+    if($('#accountTable tbody tr').length>10)
+	{   
+	   $('.next').attr('class','next');
+   	}
+	$('#accountTable_filter input').addClass('form-control');
+	$("#accountTable_filter input").attr("placeholder", "Type here to search"); 
+	$("#accountTable_filter input").attr("onkeyup", "searchFocus()");
+	$('.EtExponent').each(function(){
+		$(this).html(removeExponentFromAmount($(this).attr('value'),'@session.get("exponent")'))
+		
+	});
+	$('.amtValue').autoNumeric('init'); 
+    $('.amtValue').autoNumeric('update');
+    $('#accountTable').next('div').find('.pagination').on("click", function() { 
+    	pagination();
+    });
+    
+});
+
+function pagination(){
+	$('.EtExponent').each(function(){
+		$(this).html(removeExponentFromAmount($(this).attr('value'),'@session.get("exponent")'))
+	});
+	$('.amtValue').autoNumeric('init'); 
+    $('.amtValue').autoNumeric('update');
+}
+
+function searchFocus(){
+	debugger
+	pagination();
+}
+
+function createAccountBalance(){
+	$('#balanceListForm').submit();
+}
+
+$(document).on('click','.editAccount',function()
+{
+	$(this).closest('tr').find('.openingBalanceText').autoNumeric('set',removeExponentFromAmount(Number($(this).closest('tr').find('.openingBalanceText').autoNumeric('get')),@session.get("exponent")));
+	$(this).closest('tr').find('.editOpeningBalance').show();
+    $(this).closest('tr').find('.openingBalance').hide();
+    
+    $(this).closest('tr').find('.fopeningBalanceText').autoNumeric('set',removeExponentFromAmount(Number($(this).closest('tr').find('.fopeningBalanceText').autoNumeric('get')),@session.get("exponent")));
+	$(this).closest('tr').find('.feditOpeningBalance').show();
+    $(this).closest('tr').find('.fopeningBalance').hide();
+    
+    
+	$(this).closest('tr').find('.accountActionBtn').html('<a class="editSave" onclick="editsave(this)" href="javascript:;"><i class="fa fa-save aff-action-save editSave" title="@Messages("save")">  </i></a>  <a onclick="cancel(this)" class="cancelSave" href="javascript:;"><i class="fa fa-undo aff-action-undo cancel" title="@Messages("cancel")">  </i></a>');
+});
+
+function cancel(data)
+{
+	$(data).closest('tr').find('.openingBalanceText').val($(data).closest('tr').find('.openingBalance').autoNumeric('get'));
+    $(data).closest('tr').find('.editOpeningBalance').hide();
+    $(data).closest('tr').find('.openingBalance').show();
+    
+    $(data).closest('tr').find('.fopeningBalanceText').val($(data).closest('tr').find('.fopeningBalance').autoNumeric('get'));
+    $(data).closest('tr').find('.feditOpeningBalance').hide();
+    $(data).closest('tr').find('.fopeningBalance').show();
+	$(data).closest('tr').find('.accountActionBtn').html('<a href="#" class="editCustomer" ><span><i class="fa fa-edit" rel="tooltip" title="Edit" data-placement="bottom"></i></span></a>');
+}
+
+function editsave(data)
+{
+	$('.editAccountValues').html('');
+	var accountdetail='<input type="hidden"  value="'+$(data).closest('tr').find('.accountBalanceId').val()+'" name="accountBalanceId">'
+ 	 	+'<input type="hidden"  value="'+addExponentToAmount(Number($(data).closest('tr').find('.openingBalanceText').autoNumeric('get')),@session.get("exponent"))+'" name="openingBalance">'
+ 	 	+'<input type="hidden"  value="'+addExponentToAmount(Number($(data).closest('tr').find('.fopeningBalanceText').autoNumeric('get')),@session.get("exponent"))+'" name="fOpeningBalance">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.crAmount').val()+'" name="crAmount">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.drAmount').val()+'" name="drAmount">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.fDrAmount').val()+'" name="fcDrAmount">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.fCrAmount').val()+'" name="fcCrAmount">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.creationDate').val()+'" name="creationDate">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.accountId').val()+'" name="account.accountId">'
+ 	 	+'<input type="hidden"  value="'+$(data).closest('tr').find('.currencyId').val()+'" name="currency.currencyId">'
+ 	 	+'<input type="hidden" value="@session.get("tenantId")" name="tenant.tenantId"">';
+ 	 $('.editAccountValues').append(accountdetail);
+	 $('#updateAccountForm').submit();
+}
+		
+</script>
+}

@@ -1,0 +1,106 @@
+<!-- Modal -->
+				<div class="modal fade" id="myModal" role="dialog">
+					<div class="modal-dialog">
+
+						<!-- Modal content-->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								<h4 class="modal-title" align="center">Currency Report</h4>
+							</div>
+							<div class="modal-body">
+
+								<div class="col-md-1 pull-right" style="margin-right:58px;">
+									<button class="btn btn-warning submit"
+										onclick="submitReport(1)" type="button">
+										<i class="fa fa-download"></i> Download
+									</button>
+								</div>
+
+								<p id="viewCur"></p>
+								<BR>
+								<table class="table" style="margin-top:10px;" id="currencyTable">
+									<thead>
+										<tr style="background-color: #428bca; opacity: 0.9; color: #f9f9f9">
+											<th>Title</th>
+											<th class="text-right">Debit</th>
+											<th class="text-right">Credit</th>
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer"></div>
+						</div>
+					</div>
+				</div>
+@views.html.commonJs()
+<script>
+
+$(function(){
+	$.extend($.fn.autoNumeric.defaults,
+	{
+		aSep: ',',              
+		aDec: '.' ,
+	      mDec: '@session.get("exponent")',
+	      dGroup: '3',	
+	      vMin: -999999999.99,
+	      vMax: 99999999999999.9999
+	
+	}); 
+	
+});
+function clickCurrency(data) {
+	viewCurrency($(data).val());
+}
+
+function viewCurrency(value){
+	$.ajax({
+		type: "POST",
+    	url: "/currencyReportView",
+    	data:'primaryKey='+value,
+    	dataType: "json",
+    	success: function(data){
+    		debugger
+    		
+    		$('#myModal').modal({backdrop: 'static', keyboard: false});
+    		$("#myModal").draggable({
+    		    handle: ".modal-header"
+    		}); 
+    		
+/*     		$('#myModal').modal({
+    		    backdrop: false,
+    		    show: true
+    		  });
+
+    		  $('.modal-dialog').draggable({
+    		    handle: ".modal-header"
+    		  }); */
+    		  
+    		if(data.length>0){
+    			$('#currencyTable tbody tr').remove();
+    			 $.each(data, function(key, value){
+    		            $("#currencyTable").append("<tr><td>"+value[3]+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[1],'@session.get("exponent")')+"</td><td class='text-right amtValue control-label'>"+removeExponentFromAmount(value[0],'@session.get("exponent")')+"</td></tr>");
+    		            $('#viewCur').html('Currency Name : '+value[2]);
+    		        });
+    			 
+    			 $('.amtValue').autoNumeric('init');
+ 				$('.amtValue').autoNumeric('update');
+ 				
+ 				$('.amtValueEx').autoNumeric('init');
+ 				$('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+    		}
+    		else{
+    			$('#currencynodata').remove();
+				$('#currencyTable').append('<tr><td id="currencynodata" colspan="3">No data available</td></tr>');
+			}
+    		
+    		
+    	}
+		});
+}
+
+
+ 
+</script>

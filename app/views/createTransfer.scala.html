@@ -1,0 +1,168 @@
+@(currencyList:List[entity.Currency])
+<div id="createTransferForm">
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Transfer</a></li>
+        </ol>
+    </div>
+</div>
+<!-- <form class="form-horizontal col-md-9" id="orderFormValid" action="@controllers.routes.TransferController.createTransfer()" method="post">
+   <div id="orderForm" style="display:none" >
+      <div class="row" align="center">
+         <div class="form-group">
+               <label class="control-label col-md-2 right-align-text">Enter Amount <span class="aff-color-red">*</span></label>
+               <div class="col-md-2">	
+                  <input type="text"  class="form-control text-right amtValue transferAmt" onfocusout="calcLocalTotal(this)" data-rule-required="true"  data-msg-required="Enter Amount">
+                  <input type="hidden" id="hiddeninputAmount" name="inputAmount">
+                  
+               </div>
+                  <label class="control-label col-md-1 right-align-text">Multiply</label>
+                 <div class="col-md-1">
+                  <input type="radio" checked name="test1" id="multiply" onclick="multiplyFun()">
+               	</div>
+                  <label class="control-label col-md-1 right-align-text">Divide</label>
+                <div class="col-md-1">
+                  <input type="radio"  name="test1" id="divide" onclick="divideFun()">
+               </div>
+               <input type="hidden" id="multiplyDivideFlag" name="multiplyDivideFlag">
+               
+         </div>
+      </div>
+      <div class="row margin-top-5px">
+         <div class="col-md-1"></div>
+         <div class="col-md-3">
+         <span class="aff-color-red transferError" style="display:none">Check Input Amount</span>
+         <span class="aff-color-red accountError" style="display:none">Empty Account Not Allowed</span>
+         <span class="aff-color-red accountError1" style="display:none">Choose Different Account</span>
+         </div>
+         <div class="col-md-2" >
+            <label class="control-label">Currency</label>
+         </div>
+         <div class="col-md-2 localAmt">
+            <label class="control-label">Local Amount</label>
+         </div>
+      </div>
+      <div class="row">
+         <div class="form-group">
+            <label class="control-label col-md-2 right-align-text">Debit Account</label>
+            <div class="col-md-2">	
+              <input type="text"  class="form-control" id="fromAccount" name="test" placeholder="Search Account">
+              <input type="hidden" id="hiddenFromAccount" name="fromAccount.accountId">
+            </div>
+            <div class="col-md-2">
+               <select class="form-control" onchange="setLabel()" id="fromCurrency">
+                  <option value="">--select--</option>
+                  @for(currency <- currencyList){
+                  <option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>
+                  }
+               </select>
+               <input type="hidden" id="hiddenFromCurrency" name="fromCurrency.currencyId">
+            </div>
+            <div class="col-md-2 localAmt">	
+               <input type="text" id="fromLocalAmount" class="form-control text-right amtValue" disabled>
+               <input type="hidden" id="hiddenFromLocalAmount" name="fromLocalAmount">
+            </div>
+         </div>
+      </div>
+      <div class="row margin-top-5px">
+         <div class="form-group">
+            <label class="control-label col-md-2 right-align-text">Credit Account</label>
+            <div class="col-md-2">	
+               <input type="text"  class="form-control" name="test2" id="toAccount" placeholder="Search Account">
+               <input type="hidden" id="hiddenToAccount" name="toAccount.accountId">
+            </div>
+            <div class="col-md-2" >
+               <select class="form-control" onchange="setLabel()" id="toCurrency">
+                  <option value="">--select--</option>
+                  @for(currency <- currencyList){
+                  <option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>
+                  }
+               </select>
+               <input type="hidden" id="hiddenToCurrency" name="toCurrency.currencyId">
+            </div>
+            <div class="col-md-2 localAmt">	
+               <input type="text" id="toLocalAmount" class="form-control text-right amtValue" disabled>
+               <input type="hidden" id="hiddenToLocalAmount" name="toLocalAmount">
+            </div>
+         </div>
+      </div>
+      
+      <div class="row margin-top-5px">
+         <div class="col-md-2"></div>
+         <div class="col-md-2">
+            <label class="control-label label1"></label>
+         </div>
+         <div class="col-md-2">
+            <label class="control-label label2"></label>
+         </div>
+      </div>
+      
+      <div class="row">
+         <div class="form-group">
+            <div class="col-md-2"></div>
+            <div class="col-md-2 toCur1">
+               <input type="text" id="exchangeRate1" class="form-control text-right amtValue" onfocusout="calcLocalTotal(this)">
+               <input type="hidden" id="hiddenExchangeRate1" name="exchangeRate1">
+            </div>
+            <div class="col-md-2 toCur2" style="display:none">	
+               <input type="text" id="exchangeRate2" class="form-control text-right amtValue" onfocusout="calcLocalTotal(this)">
+               <input type="hidden" id="hiddenExchangeRate2" name="exchangeRate2">
+            </div>
+         </div>
+      </div>
+      <div class="row margin-top-5px">
+         <div class="col-md-8"></div>
+         <div class="col-md-4">
+         </div>
+      </div>
+      <input type="hidden" id="exponent" name="exponent" value="2">
+      <input type="hidden" id="userId" name="user.userId" value="1001">
+      <div class="row">
+         <div class="form-group">
+            <div style="display: block">
+               <label class="control-label col-md-2 right-align-text">Description</label>
+               <div class="col-md-6">	
+                  <textarea class="form-control textDescription" rows="3" placeholder="Enter To Descripton"></textarea>
+                  <input type="hidden" id="description"  name="comments" class="">
+               </div>
+            </div>
+         </div>
+      </div>
+      </br></br>
+      <div align="center">
+         <button class="btn btn-primary submit" type="button" onclick="submitTransfers()"><i class="fa fa-check"></i> Submit</button>
+         <button class="btn btn-danger cancel" type="button" onclick="cancelOrder()"><i class="fa fa-times"></i> Cancel</button>
+         <button  type="button" onclick="closeOrder()" class="btn btn-danger close1"><i class="fa fa-times"></i> Close</button>
+      </div>
+   </div>
+   
+   </form> -->
+   
+  <form id="reportForm" class="form-horizontal col-md-3" action="@controllers.routes.ReportController.downloadReport()" method="post">
+   
+   <div class="row">
+         <div class="form-group">
+               	<label class="control-label col-md-1">Currency</label>
+               	<div class="col-md-2">
+               	 <input type="text"  class="form-control" name="test2" id="currency" placeholder="Search currency">
+               	<input type="hidden" id="hiddenCurrency" name="currencyId">
+               	<input type="hidden" name="tenantId" value="@session.get("tenantId")">
+               	<input type="hidden" id="reportId" name="reportId" value="6001">
+               	
+               	</div>
+            </div>
+         </div>
+		<br><br>
+      	<div align="center" class="col-md-6">
+        	<button class="btn btn-primary submit"  onclick="submitReport()" type="button"><i class="fa fa-download"></i> Download</button>
+      </div>
+      
+   </form>
+</div>
+
+<script>
+
+
+</script>

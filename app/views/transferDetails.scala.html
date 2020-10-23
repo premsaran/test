@@ -1,0 +1,28 @@
+@(transcation:entity.Transcation)
+@import java.lang.String; var exponent ={"2"};
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">View Transfer</a></li>
+        </ol>
+    </div>
+</div>
+<form id="reportForm" class="form-horizontal">
+   <div class="row">
+       <div class="form-group">
+             	<label class="control-label col-md-2">Debit Account</label>
+             	<label class="control-label col-md-3">@transcation.getFromAccount().getAccountName()</label>
+             	<label class="control-label col-md-2">Credit Account</label>
+             	<label class="control-label col-md-3">@transcation.getToAccount().getAccountName()</label>
+        </div>
+   </div>
+   
+    </br></br>
+      <div align="center">
+         <button  type="button" href="/viewTransfer" class="btn btn-danger close1"><i class="fa fa-times"></i> Close</button>
+      </div>
+      
+   </form>
+}

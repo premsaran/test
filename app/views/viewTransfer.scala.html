@@ -1,0 +1,425 @@
+@(account:List[entity.Account],currencyList:List[entity.Currency],bal:String)
+@views.html.main(){
+
+<div class="row">
+	<div class="col-md-12">
+		<ol class="breadcrumb breadcrumb-txt-size">
+			<li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Transfer</a></li>
+			<div class="pull-right" style="color: red;"><b>@play.Play.application().configuration().getString("application.cash.accountId"): <span id="cash" class="tableAmtValue">@bal</span></b></div>
+		</ol>
+	</div>
+</div>
+<div class="col-md-12">
+<div class="row">
+	<div class="form-group dateDIv">
+    	<label class="control-label col-md-2 text-right">From Date</label>
+        <div class="col-md-2">
+       		<input type="text" id="fromDate" class="form-control date" data-date-format="dd/mm/yyyy" readonly>
+       	</div>
+       	<label class="control-label col-md-2 text-right">To Date</label>
+        <div class="col-md-2">
+       		<input type="text" id="toDate" class="form-control date" data-date-format="dd/mm/yyyy" readonly>
+       	</div>
+       	<div class="col-md-2">
+       		<button class="btn btn-primary" onclick="viewTransferDetails()"><i class="fa fa-filter"></i></button>
+       	</div>
+	</div>
+</div>
+</div>
+
+<div class="row" id="orderList" style="display:none">
+	<div class="col-md-12">
+		<table class="table table-bordered  table-hover table-striped"
+			id="orderTable">
+			<thead>
+				<tr style="background-color: #428bca; opacity: 0.9; color: #f9f9f9">
+					<th><i class="fa fa-calendar"></i> Date</th>
+					<th><i class="fa fa-list-ol"></i> Sequence No</th>
+					<th><i class="fa fa-user"></i> Created By</th>
+					<th><i class="fa fa-bookmark"></i> From Account</th>
+					<th><i class="fa fa-bookmark"></i> To Account</th>
+					<th><i class="fa fa-money"></i> From Currency</th>
+					<th><i class="fa fa-money"></i> To Currency</th>
+					<th><i class="fa fa-hourglass-start"></i> Amount</th>
+					<th><i class="fa fa-hourglass-start"></i> Status</th>
+					<th>Action</th>
+				</tr>
+			</thead>
+			<tbody>		
+			</tbody>
+		</table>
+	</div>
+</div>
+<form id="editForm" method="post">
+<input type="hidden" id="editTransId" name="transcationId">
+<input type="hidden" id="tenantId" name="tenant.tenantId" value="@session.get("tenantId")">
+</form>
+<form class="form-horizontal col-md-8" id="orderFormValid" action="@controllers.routes.TransferController.createTransfer()" method="post">
+	<input type="hidden" value="100001" name="transcationStatus.statusId">
+	<div id="orderForm" style="display:none;">
+		<div class="row" align="center">
+			<div class="form-group">
+				<label class="control-label col-md-3 right-align-text">Multiply</label>
+				<div class="col-md-1" style="margin-left: -33px;">
+					<input type="radio" checked name="test1" id="multiply"
+						onclick="multiplyFun()">
+				</div>
+				<label class="control-label col-md-1 right-align-text">Divide</label>
+				<div class="col-md-1" style="margin-left: -33px;">
+					<input type="radio" name="test1" id="divide" onclick="divideFun()">
+				</div>
+				<input type="hidden" id="multiplyDivideFlag"
+					name="multiplyDivideFlag">
+
+			</div>
+		</div>
+		<div class="row margin-top-5px">
+			<div class="col-md-1"></div>
+			<div class="col-md-3">
+				<span class="aff-color-red transferError" style="display: none">Check
+					Input Amount</span> <span class="aff-color-red accountError"
+					style="display: none">Empty Account Not Allowed</span> <span
+					class="aff-color-red accountError1" style="display: none">Choose
+					Different Account</span> <span class="aff-color-red currencyError"
+					style="display: none">Choose Currency </span>
+
+			</div>
+			<div class="col-md-2">
+				<label class="control-label">Convert Currency</label>
+			</div>
+			<div class="col-md-2 localAmt">
+				<label class="control-label">Local Amount</label>
+			</div>
+			<!-- <div class="col-md-2 localAmt">
+				<label class="control-label"> Account Balance</label>
+			</div> -->
+		</div>
+		<div class="row">
+			<div class="form-group">
+				<label class="control-label col-md-2 right-align-text">Debit
+					Account</label>
+				<div class="col-md-2">
+					<input type="text" class="form-control fromAccount" id="fromAccount"
+						name="test" placeholder="Search Account" onfocusout="resetFromTo(this)">
+				</div>
+				<div class="col-md-2">
+					<select class="form-control" onchange="setLabel(1)"
+						id="fromCurrency">
+						<option value="">--select--</option> @for(currency <-
+						currencyList){
+						<option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>
+						}
+					</select> <input type="hidden" id="hiddenFromCurrency"
+						name="fromCurrency.currencyId">
+				</div>
+				<div class="col-md-2 localAmt">
+					<input type="text" id="fromLocalAmount"
+						class="form-control text-right amtValue" disabled> <input
+						type="hidden" id="hiddenFromLocalAmount" name="fromLocalAmount">
+				</div>
+				<!-- <div class="col-md-2 localAmt">
+					<input type="text" id="fromAccountBalance"
+						class="form-control text-right amtValue" disabled> 
+				</div> -->
+			</div>
+		</div>
+		<div class="row margin-top-5px">
+			<div class="form-group">
+				<label class="control-label col-md-2 right-align-text">Credit
+					Account</label>
+				<div class="col-md-2">
+					<input type="text" class="form-control toAccount" name="test2" id="toAccount"
+						placeholder="Search Account" onfocusout="resetFromTo(this)"> 
+				</div>
+				<div class="col-md-2">
+					<select class="form-control" onchange="setLabel(1)" id="toCurrency">
+						<option value="">--select--</option> @for(currency <-
+						currencyList){
+						<option value="@currency.getCurrencyId()">@currency.getCurrencyCode()</option>
+						}
+					</select> <input type="hidden" id="hiddenToCurrency"
+						name="toCurrency.currencyId">
+				</div>
+				<div class="col-md-2 localAmt">
+					<input type="text" id="toLocalAmount"
+						class="form-control text-right amtValue" disabled> <input
+						type="hidden" id="hiddenToLocalAmount" name="toLocalAmount">
+				</div>
+				<!-- <div class="col-md-2 localAmt">
+					<input type="text" id="toAccountBalance"
+						class="form-control text-right amtValue" disabled> 
+				</div> -->
+			</div>
+		</div>
+
+		<div class="row margin-top-5px">
+			<div class="form-group">
+				<label class="control-label col-md-2 right-align-text hideCurrency"
+					style="display: none">Currency </label>
+				<div class="col-md-2 hideCurrency" style="display: none">
+					<select class="form-control" onchange="setLabel(2)"
+						id="currencyVal">
+					</select> <input type="hidden" id="hiddenCurrencyVal">
+					<span class="aff-color-red givenCurrencyError" style="display: none">Select Given Currency </span>
+				</div>
+
+				<label class="control-label col-md-2 right-align-text">Enter
+					Amount <span class="aff-color-red" style="position: absolute !important;">*</span>
+				</label>
+				<div class="col-md-2">
+					<input type="text"
+						class="form-control text-right amtValue transferAmt" name="test"
+						onkeyup="calcLocalTotal(this)" data-rule-required="true"
+						data-msg-required="Enter Amount"> <input type="hidden"
+						id="hiddeninputAmount" name="inputAmount">
+				</div>
+			</div>
+		</div>
+
+
+		<div class="row margin-top-5px">
+			<div class="col-md-2"></div>
+			<div class="col-md-2">
+				<span class="aff-color-red exchangeError1" style="display: none">Check
+					Exchange Rate </span> <label class="control-label label1"></label>
+			</div>
+			<div class="col-md-2">
+				<label class="control-label label2"></label>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="form-group">
+				<label
+					class="control-label col-md-2 right-align-text hideRate hhhRate">Exchange
+					Rate</label>
+				<div class="col-md-2 toCur1">
+					<input type="text" id="exchangeRate1"
+						class="form-control text-right amtValueEx"
+						onkeyup="calcLocalTotal(this)">
+				</div>
+				<div class="col-md-2 toCur2" style="display: none">
+					<input type="text" id="exchangeRate2"
+						class="form-control text-right amtValueEx"
+						onkeyup="calcLocalTotal(this)">
+
+				</div>
+			</div>
+		</div>
+		<div class="row margin-top-5px">
+			<div class="col-md-8"></div>
+			<div class="col-md-4"></div>
+		</div>
+		<input type="hidden" id="hiddenExchangeRate1" name="exchangeRate1">
+		<input type="hidden" id="hiddenExchangeRate2" name="exchangeRate2">
+		<input type="hidden" id="exponent" name="exponent"
+			value="@session.get("exponent")"> <input type="hidden"
+			id="userId" name="user.userId" value="@session.get("userId")">
+		<div class="row">
+			<div class="form-group dateDIv">
+				<label class="control-label col-md-2 right-align-text" >Transaction Date</label>
+				<div class="col-md-4">
+					<input type="text" id="date" name="" class="form-control" data-date-format="dd/mm/yyyy" readonly>
+					<input type="hidden" id="dateHidden" name="transcationDate">
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group">
+				<div style="display: block">
+					<label class="control-label col-md-2 right-align-text">Description
+						<span class="aff-color-red" style="position: absolute !important;">*</span>
+					</label>
+					<div class="col-md-4">
+						<textarea class="form-control textDescription" rows="3" style="height:100%;"
+							placeholder="Enter To Descripton"></textarea>
+						<input type="hidden" id="description" name="comments" class="">
+						<span class="aff-color-red descriptionError" style="display: none">Enter
+							Description</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group deleteDate" style="display:none">
+				<label class="control-label col-md-2 right-align-text" >Deleted Date</label>
+				<div class="col-md-4"><input type="text" id="deleteDate" name="" class="form-control readonly"><input type="hidden" id="deleteDateHidden" name="deleteDate"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group deleteDescriptionDiv" style="display: none">
+					<label class="control-label col-md-2 right-align-text">Deleted Description</label>
+					<div class="col-md-10">
+						<textarea class="form-control deleteDescription" id="deleteDescription" rows="3" style="height:100%;"
+							placeholder="Enter To Delete Descripton"></textarea>
+						<span class="aff-color-red descriptionError" style="display: none">Enter Delete
+							Description</span>
+					</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group recallDate" style="display:none">
+				<label class="control-label col-md-2 right-align-text" >Recall Date</label>
+				<div class="col-md-4"><input type="text" id="recallDate" name="" class="form-control readonly"><input type="hidden" id="recallDateHidden" name="recallDate"></div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="form-group recallDescriptionDiv" style="display: none">
+					<label class="control-label col-md-2 right-align-text">Recall Description</label>
+					<div class="col-md-10">
+						<textarea class="form-control recallDescription" id="recallDescription"  rows="3" style="height:100%;"
+							placeholder="Enter To Recall Descripton"></textarea>
+						<span class="aff-color-red descriptionError" style="display: none">Enter Recall
+							Description</span>
+					</div>
+			</div>
+		</div>
+		</br>
+		</br>
+		<div class="col-md-6" align="center">
+			<button class="btn btn-primary submit viewBtn" type="button" onclick="submitTransfers()"> <i class="fa fa-check"></i> Submit</button>
+			<button class="btn btn-primary update viewBtn" style="display:none" type="button" onclick="updateTransfers()"><i class="fa fa-check"></i> Submit</button>
+			<button class="btn btn-danger cancel viewBtn" type="button" onclick="cancelOrder()"><i class="fa fa-times"></i> Cancel</button>
+			<button type="button" onclick="cancelOrder()" class="btn btn-danger close1 closeBtn"><i class="fa fa-times"></i> Close</button>
+		</div>
+	</div>
+</form>
+<form id="updateForm" action="@controllers.routes.TransferController.updateTransfer()" method="post">
+	<input type="hidden" name="primaryKey" class="transId">
+	<input type="hidden" name="url" class="recDesc">
+	<input type="hidden" name="startDate" class="transDate">
+</form>
+@views.html.modal() @views.html.TransferReportModal()
+@views.html.commonJs()
+<script>
+
+$(function(){
+	tableIntialization();
+	autocompleteInitialize('getCurrency','searchCurrencyCode','','','');
+	autocompleteInitialize('getVendor','searchAccountName','','','');
+	if($('#cash').text()==""){
+		$('#cash').text('0');
+	} 
+		 var dateFormat = $.datepicker.formatDate('dd/mm/yy', new Date());
+		 $('#fromDate').val(dateFormat);
+		 $('#toDate').val(dateFormat);
+		 
+		 $("#fromDate").datepicker({
+			 dateFormat: "dd/mm/yy",
+			 endDate:"now",
+			 autoclose: true
+			 });
+		 $("#toDate").datepicker({ 
+			 dateFormat: "dd/mm/yy",
+			 endDate:"now",
+			 autoclose: true
+			 });
+		 
+	$.extend($.fn.autoNumeric.defaults,
+			  {
+					aSep: ',',              
+					aDec: '.' ,
+			        mDec: '@session.get("exponent")',
+			        dGroup: '3',	
+			        vMin: -99999999999999.9999,
+			        vMax: 99999999999999.9999
+
+			}); 
+	$('#createTransferForm').hide();
+	@if(flash.containsKey("tranId")) {
+		var transid = '@flash.get("tranId")';
+		openSysnModal(transid);
+		@flash().clear();
+	}
+	$('.amtValue').autoNumeric('init');
+	$('.tableAmtValue').autoNumeric('init');
+	$('.tableAmtValue').autoNumeric('update');
+	$('.amtValue').autoNumeric('set',0);
+	$('.amtValueEx').autoNumeric('init');
+	$('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+	$('.amtValueEx').autoNumeric('set',0);
+	$('#reportForm').hide();
+	$("form").attr('autocomplete', 'off');
+	autocompleteInitialize('fromAccount','searchAccountNameWithExp','fromAccount.accountName','fromAccount.accountId','getFromAccount');
+	autocompleteInitialize('toAccount','searchAccountNameWithExp','toAccount.accountName','toAccount.accountId','getToAccount');	
+	
+});
+
+function transEdit(data,flag){
+	$('#editTransId').val($(data).closest('tr').find('#transId').val());
+	$('#editForm').attr('action','/editTransaction?flag='+flag+'');
+	$('#editForm').submit();
+}
+
+	function viewTransferDetails(){
+		$('#orderList').show();
+		debugger
+		var from = $.datepicker.formatDate('dd/mm/yy',$('#fromDate').datepicker('getDate'));
+		 $("#fromDate").val(from);
+		 var to = $.datepicker.formatDate('dd/mm/yy',$('#toDate').datepicker('getDate'));
+		 $("#toDate").val(to);
+		$.ajax({
+			type: "GET",
+			url: "/fromToDateTransactionDetails?from="+from+"&to="+to+"",
+	    	dataType: "json",
+	    	success: function(data){
+	    		if(data.length>0){
+	    			//if($.fn.DataTable.fnIsDataTable('#orderTable'))
+	    			$('#orderTable').dataTable().fnDestroy();
+        			$('#orderTable tbody tr').remove();
+        			$('#orderTable').css("width", "");
+        			 $('#orderTable thead tr th').each(function() {
+        				  $(this).css("width", "");
+        			});
+	    			for(var i=0;i<data.length;i++){
+	    				$("#orderTable").append('<tr>'
+						+'<input type="hidden" class="control-label" id="transId" value="'+data[i].transcationId+'">'
+						+'<td  class="control-label">'+splitDateAndTime(data[i].transcationDate)+'</td>'
+						+'<td  class="control-label">'+data[i].transSeqNo+'</td>'
+						+'<td  class="control-label">'+data[i].userName+'</td>'
+						+'<td class="control-label">'+data[i].fromAccount+'</td>'
+						+'<td  class="control-label">'+data[i].toAccount+'</td>'
+						+'<td  class="control-label">'+data[i].fromCurrency+'</td>'
+						+'<td  class="control-label">'+data[i].toCurrency+'</td>'
+						+'<td class="tableAmtValue text-right control-label">'+removeExponentFromAmount(data[i].inputAmount,'@session.get("exponent")')+'</td>'
+						+'<td class="control-label">'+data[i].transcationStatus+'</td>'
+						+'<td class="text-center"><a href="#" onclick="transEdit(this,1)"><span><i class="fa fa-eye" rel="tooltip" title="View" data-placement="bottom"></i></span></a>'
+						+'&nbsp;<a href="#" onclick="transEdit(this,2)"><span><i class="fa fa-pencil-square-o" rel="tooltip" title="Edit" data-placement="bottom"></i></span></a>'
+						+'&nbsp;<a href="#" onclick="openSysnModal(\''+data[i].transcationId+'\')"><span><i class="fa fa-file-text-o" rel="tooltip" title="View Report" data-placement="bottom"></i></span></a></td>'
+						+'</tr>'); 			  
+	    			}
+	    			$('.tableAmtValue').autoNumeric('init');
+	 				$('.tableAmtValue').autoNumeric('update');
+	 				tableIntialization()
+	 				
+	 				}else{
+	 					 
+	    			$('#orderTable tbody tr').remove();
+					$('#orderTable').append('<tr><td id="currencynodata" colspan="10">No data available</td></tr>');
+					    		
+	    	}
+	    	}
+			});
+		}
+  function tableIntialization(){
+	$('#orderTable').dataTable({
+	 	 "aLengthMenu": [[5,10, 25, 50], [5,10, 25, 50]],
+	 	"bSort": false,
+		  "iDisplayLength": 10
+	});
+	 $('.dataTables_wrapper').find('.clearfix').removeClass('clearfix');
+	 if($('#orderTable tbody tr').length >10)
+	{   
+	   $('.next').attr('class','next');
+ 	}
+	 else{
+		 $('.next').attr('class','next disabled');
+	 }
+	$('#orderTable_filter input').addClass('form-control');
+	$("#orderTable_filter input").attr("placeholder", "Type here to search");		
+	} 
+</script>
+</body>
+</html>
+}

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report.jrxml" pageWidth="595" pageHeight="600" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="073cff9b-a556-49dc-98e8-ecf8b58548c6">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="Style1"/>
+	<parameter name="Profit" class="java.lang.String"/>
+	<parameter name="Loss" class="java.lang.String"/>
+	<parameter name="Profit_loss" class="java.lang.String"/>
+	<parameter name="Profit_loss_Title" class="java.lang.String"/>
+	<parameter name="StartDatelabel" class="java.lang.String"/>
+	<parameter name="StartDate" class="java.lang.String"/>
+	<parameter name="endDate" class="java.lang.String"/>
+	<queryString>
+		<![CDATA[]]>
+	</queryString>
+	<field name="SNO" class="java.lang.String"/>
+	<field name="CR_AMT" class="java.lang.String"/>
+	<field name="DR_AMT" class="java.lang.String"/>
+	<field name="Field_1" class="java.lang.String"/>
+	<variable name="SNO1" class="java.lang.Integer" resetType="Page" calculation="Count">
+		<variableExpression><![CDATA[$F{SNO}]]></variableExpression>
+	</variable>
+	<background>
+		<band height="560">
+			<frame>
+				<reportElement x="0" y="0" width="555" height="560" uuid="9ae104ad-5314-4dc1-b933-7273cf548cf9"/>
+				<box>
+					<topPen lineWidth="0.5"/>
+					<leftPen lineWidth="0.5"/>
+					<bottomPen lineWidth="0.5"/>
+					<rightPen lineWidth="0.5"/>
+				</box>
+			</frame>
+		</band>
+	</background>
+	<title>
+		<band height="67" splitType="Stretch">
+			<textField isBlankWhenNull="false">
+				<reportElement x="150" y="0" width="244" height="20" uuid="866896e4-055e-445a-969d-f7e326931281"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Profit_loss_Title}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="7" y="41" width="100" height="20" uuid="ef96f2b2-bfb2-472a-83e3-240fc2bd00bb"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{StartDatelabel}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="109" y="41" width="100" height="20" uuid="13e10e82-ef6f-4e6d-8ede-29739165a344"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{StartDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="358" y="41" width="100" height="20" uuid="64c8054d-d24e-4e17-a4ab-5d52c850b8fc"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[EndDate  :]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="462" y="41" width="83" height="20" uuid="5cb8e5f2-4293-4ccd-be8f-6db35265b90a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{endDate}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<columnHeader>
+		<band height="20" splitType="Stretch">
+			<property name="com.jaspersoft.studio.layout" value="com.jaspersoft.studio.editor.layout.FreeLayout"/>
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="20" backcolor="#EBE8E8" uuid="5a5fe646-430a-4e67-9e00-bd893b031cb7">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<staticText>
+					<reportElement x="280" y="0" width="100" height="20" uuid="223df485-c335-43ba-a6be-444152b53685">
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					</reportElement>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Credit Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="180" y="0" width="98" height="20" uuid="ee148483-9116-4482-a87a-8c92176700b8">
+						<property name="com.jaspersoft.studio.unit.y" value="pixel"/>
+						<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+					</reportElement>
+					<textElement>
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Debit Amount]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="20" splitType="Stretch">
+			<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+			<frame>
+				<reportElement x="0" y="0" width="555" height="20" uuid="1f359271-cd37-4aef-bf0e-90d9a0acd8ba">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textField>
+					<reportElement x="280" y="0" width="100" height="20" uuid="0ff80627-357a-431d-a4fa-edb09ec526de">
+						<property name="com.jaspersoft.studio.unit.x" value="pixel"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{DR_AMT}]]></textFieldExpression>
+				</textField>
+				<textField>
+					<reportElement x="180" y="0" width="98" height="20" uuid="9cfcb6cd-eebd-4668-b4c5-e202249d8f9f">
+						<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+					</reportElement>
+					<textFieldExpression><![CDATA[$F{CR_AMT}]]></textFieldExpression>
+				</textField>
+			</frame>
+		</band>
+	</detail>
+	<summary>
+		<band height="20" splitType="Stretch">
+			<textField>
+				<reportElement x="330" y="0" width="100" height="20" uuid="79b4e38f-b3a8-4d3b-bf92-b1ab7c0357c3">
+					<property name="com.jaspersoft.studio.unit.height" value="pixel"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$P{Profit}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="230" y="0" width="100" height="20" uuid="dd3e175a-8665-42fd-8be0-3d283b3e26a7"/>
+				<textFieldExpression><![CDATA[$P{Profit_loss}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

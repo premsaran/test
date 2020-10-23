@@ -1,0 +1,386 @@
+@(currencyList:List[entity.Currency],transaction:entity.Transcation,bal:String,check:String,accountList:List[entity.Account])
+@import java.lang.Long; var size=0L;
+@import java.lang.Long; var count=0L;
+@import java.util.Set;var currencySet = {new HashSet[String]}
+@views.html.main(){
+<div class="row">
+	<div class="col-md-12">
+		<ol class="breadcrumb breadcrumb-txt-size">
+			<li><a href="#">Home</a></li>
+			<div class="pull-right" style="color: red;"><b>@play.Play.application().configuration().getString("application.cash.accountId"):  <span id="cash" class="tableAmtValue">@bal</span></b></div>
+		</ol>
+	</div>
+</div>
+<div>
+<div class="pull-left">
+<ul class="list-group">
+<li class="list-group-item" style="background-color:#428bca;opacity: 0.9; color:#f9f9f9;">Currency Report</li>
+@for(currency <-currencyList){
+@if(play.Play.application().configuration().getLong("application.homePageCurrencyList.size") > size){
+<li class="list-group-item" style="padding:unset;">
+<div class="row" style="margin-left:9%;">
+<div class="col-md-1">
+	<input type="checkbox" value="@currency.getCurrencyId()" class="@currency.getCurrencyId()" textVal="@currency.getCurrencyCode()" onclick="clickCurrency(this)">
+</div>
+<div class="col-md-1" style="margin-top:22px;">
+	<label class="control-label" style="color: blue !important;">@currency.getCurrencyCode()</label>
+</div>
+
+</div>
+</li>
+ @{size=size+1}
+ <div style="display:none">
+ @{currencySet.add(currency.getCurrencyId())}
+ </div>
+}}
+</ul>
+</div>
+<div class="col-md-9" style="background: url('/getBackImage');background-size: 100% 100%; background-repeat: no-repeat; width:77%;">
+@views.html.transcationLayout(currencyList,transaction,check,accountList)
+<div class="grid-stack" id=""></div>
+</div>
+
+<div class="pull-right">
+
+<form id="reportForm" class="form-horizontal" style="margin-left: -123px;" action="@controllers.routes.ReportController.downloadReport()" method="post">
+	<div class="row">
+		<div class="form-group">
+			<h4 class="widget-h" style="margin-left: 40%;">Vendor Report</h4>
+		</div>
+		<div class="form-group" style="margin-left: 43%;">
+			<div class="col-md-7">
+			<input type="hidden" id="reportId" name="reportId" value="6001">
+				<input type="text" class="form-control getVendor" id="vendor1"
+					placeholder="Search Vendor" oninput="resetVendor()" onfocusout="resetFromTo(this)">
+					 <input type="hidden" id="hiddenCustomer" name="customerId">
+					 <input type="hidden" name="tenantId" value="@session.get("tenantId")">
+			 </div>
+			<div class="vendorReportBtn">
+				<button type="button" class="btn btn-success" data-toggle="modal"
+					data-target="#vendorModal" onclick="viewVendor()">
+					<i class="fa fa-eye"></i>
+				</button>
+				<div class="modal fade" id="vendorModal" role="dialog">
+					<div class="modal-dialog modal-lg">
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal">&times;</button>
+								<h4 class="modal-title" align="center">Vendor Report</h4>
+							</div>
+							<div class="modal-body">
+								
+								<div class="col-md-1 pull-right" style="margin-right:36px;">
+									
+									<button class="btn btn-warning submit "
+										onclick="submitReport(2)" type="button">
+										<i class="fa fa-download"></i> Download
+									</button>
+									
+								</div>
+
+								<p id="viewVendor"></p>
+								<BR>
+								
+								<table class="table" id="vendorTable">
+									<thead>
+										<tr style="background-color: #428bca; opacity: 0.9; color: #f9f9f9">
+											<th>Customer</th>
+											<th>Currency</th>
+											<th class="text-right">F OpeningBalance</th>
+											<th class="text-right">F Cr Amount</th>
+											<th class="text-right">F Dr Amount</th>
+											<th class="text-right">OpeningBalance</th>
+											<th class="text-right">Dr Amount</th>
+											<th class="text-right">Cr Amount</th>
+
+										</tr>
+									</thead>
+									<tbody>
+									</tbody>
+								</table>
+							</div>
+							<div class="modal-footer"></div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<input type="hidden" id="hiddenReporFlag" name="flag">
+	</div>
+	<br>
+	<br>
+</form>
+
+<ul class="list-group" style="margin-top: -25%;">
+@for(currency <-currencyList){
+@if(!currencySet.contains(currency.getCurrencyId())){
+@if(count==0L){
+<li class="list-group-item" style="background-color:#428bca;opacity: 0.9; color:#f9f9f9;">Currency Report</li>
+@{count=count+1}
+}
+<li class="list-group-item" style="padding:unset;">
+<div class="row" style="margin-left:9%;padding:unset;">
+<div class="col-md-1">
+	<input type="checkbox" value="@currency.getCurrencyId()" class="@currency.getCurrencyId()" textVal="@currency.getCurrencyCode()" onclick="clickCurrency(this)">
+</div>
+<div class="col-md-1" style="margin-top:22px;">
+	<label class="control-label" style="color: blue !important;">@currency.getCurrencyCode()</label>
+</div>
+
+</div>
+</li>
+}}
+</ul>
+</div>
+</div>
+
+<form id="widgetForm" action="/saveWidget" method="post">
+<div id="widgetValues"></div>
+</form>
+@views.html.commonJs()
+<script type="text/javascript">
+$(function () {
+	debugger
+	autocompleteInitialize('getVendor','searchAccountNameWithoutCashandExp','','','');
+	if($('#cash').text()==""){
+		$('#cash').text('0');
+	}
+	$('#clickSideBar').click();
+	
+	$(function(){
+		$.extend($.fn.autoNumeric.defaults,
+		{
+			aSep: ',',              
+			aDec: '.' ,
+		      mDec: '@session.get("exponent")',
+		      dGroup: '3',	
+		      vMin: -999999999.99,
+		      vMax: 99999999999999.9999
+		
+		}); 
+		
+	});
+	$('.tableAmtValue').autoNumeric('init');
+	$('.tableAmtValue').autoNumeric('update');
+    $('.grid-stack').gridstack(); 
+    	var options = {
+            cellHeight: 120,
+            verticalMargin: 40
+        };
+        $('.grid-stack').gridstack(options);
+    	$("#date").select().focus();
+});
+
+function closeFun(data,className,ids) {
+	$('.'+ids).trigger('click');
+	$('.grid-stack').data('gridstack').remove_widget($('.'+className));
+}
+var count="";
+function clickCurrency(data) {
+	count=$(data).val();
+	var ids="g"+count;
+	if($(data).is(":checked")){
+	$(data)
+	var divHeader = '<div class="grid-stack-item g'+count+'" data-gs-x="0" data-gs-y="0" data-gs-width="4" data-gs-height="4">'
+	+'<div class="grid-stack-item-content" style="background:  white;box-shadow: 1px 1px 1px 1px;">'
+	+'<div class="modal-header" style="width: 100%;height:  11%;">'
+	+'<button type="button" class="close" onclick="closeFun(this,\''+ids+'\',\''+count+'\')" style="margin-top: -8px;">&times;</button>'
+	+'	<h4 class="modal-title" align="center" style="margin-top: -8px;">Currency Report</h4>'
+	+'</div>'
+	+'	<p id="viewCur'+count+'"></p>'
+	+'	<table class="table" style="margin-top:10px;" id="currencyTable'+count+'">'
+	+'		<thead>'
+	+'			<tr style="background-color: #428bca; opacity: 0.9; color: #f9f9f9">'
+	+'<th>Title</th>'
+						+'			<th class="text-right">Debit</th>'
+						+'			<th class="text-right">Credit</th>'
+						+'</tr>'
+						+'</thead>'
+						+'<tbody>'
+						+'</tbody>'
+						+'</table>'
+						+'<div class="modal-footer">'
+				        +'<button type="button" class="btn btn-default" onclick="closeFun(this,\''+ids+'\',\''+count+'\')">Close</button>'
+				      	+'</div>'
+						+'</div>'
+						+'</div>';
+						
+	$('.grid-stack').data('gridstack').addWidget(divHeader, 0, 0,3, 4, true);
+	viewCurrency($(data).val(),count,$(data).attr('textval'));
+	} else {
+		$('.grid-stack').data('gridstack').remove_widget($('.'+ids));
+	}
+}
+
+
+function viewCurrency(value,count,text){
+	$.ajax({
+		type: "POST",
+    	url: "/currencyReportView",
+    	data:'primaryKey='+value,
+    	dataType: "json",
+    	success: function(data){
+    		debugger
+    		if(data.length>0){
+    			var totalDr=0,totalCr=0;
+    			$('#currencyTable'+count+' tbody tr').remove();
+    			 $.each(data, function(key, value){
+    				 var totaldebit=0,totalcredit=0;
+    				 if(value[0]>value[1]){
+    					 totaldebit=value[0]-value[1];
+    					 totalcredit=0;
+    				 }
+    				 else if(value[1]==value[0]){
+    					 totalcredit=0;
+    					 totaldebit=0;
+    				 }
+    				 else{
+    					 totalcredit=value[1]-value[0];
+    					 totaldebit=0;
+    				 }
+    				 totalDr=totalDr+totaldebit;
+    				 totalCr=totalCr+totalcredit;
+    				 var totalvalue=totaldebit+totalcredit;
+    				 if(totalvalue!=0) {
+    					 var crAmt="",drAmt="";
+    				 if(Number(totaldebit) > 0)
+    					 drAmt=removeExponentFromAmount(totaldebit,'@session.get("exponent")');
+    				 if(Number(totalcredit) > 0)
+    					 crAmt=removeExponentFromAmount(totalcredit,'@session.get("exponent")');
+    		            $('#currencyTable'+count).append("<tr><td class='blackColor'>"+value[3]+"</td><td class='text-right amtValue drStyle'>"+drAmt+"</td><td class='text-right amtValue crStyle'>"+crAmt+"</td></tr>");
+    		            debugger
+    		            $('#currencyTable'+count).find('tbody tr').find('.drStyle').css("color","red");
+    		            $('#currencyTable'+count).find('tbody tr').find('.crStyle').css("color","#000080");
+    				 }
+    		            $('#viewCur'+count).html('Currency Code : '+value[4]);
+    		        });
+    			 var emptyVal="-";
+    			 $('#currencyTable'+count).append("<tr><td class='emptyVal'>"+emptyVal+"</td><td></td><td></td></tr>");
+    			 $('#currencyTable'+count).append("<tr><td class='blackColor'>Total</td><td class='text-right amtValue blackColor'>"+removeExponentFromAmount(totalDr,'@session.get("exponent")')+"</td><td class='text-right amtValue blackColor'>"+removeExponentFromAmount(totalCr,'@session.get("exponent")')+"</td></tr>");
+    			 var total=totalCr-totalDr;
+    			 if(total>=0){
+    				 $('#currencyTable'+count).append("<tr><td></td><td></td><td class='text-right amtValue blackColor'>"+removeExponentFromAmount(total,'@session.get("exponent")')+"</td></tr>");
+    				    
+    			 	 }else{
+    			 		$('#currencyTable'+count).append("<tr><td></td><td class='text-right amtValue blackColor'>"+removeExponentFromAmount(total,'@session.get("exponent")')+"</td><td></td></tr>");
+    	    			
+    			 	 }
+			     $('.amtValue').autoNumeric('init');
+ 				$('.amtValue').autoNumeric('update');
+ 				$('.amtValueEx').autoNumeric('init');
+ 				$('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+ 				$('#currencyTable'+count).find('tbody tr td').css("font-weight","600");
+ 				$('#currencyTable'+count).find('td').css("border","1px solid black");
+				$('#currencyTable'+count).find('tbody tr td').find('.blackColor').css("color","#00000");
+				$('.emptyVal').css("color","#FFFAFA");
+    		} else {
+    			$('#currencynodata'+count).remove();
+    			 $('#viewCur'+count).html('Currency Code : '+text);
+				$('#currencyTable'+count).append('<tr><td id="currencynodata'+count+'" colspan="3">No data available</td></tr>');
+			}
+    	}
+		});
+}
+
+function saveWidget() {
+	$('#widgetForm').submit();
+}
+
+function viewVendor(){
+	var url="";
+	if($('.id_getVendor').val()==undefined){
+		url="";
+	}
+	else{
+		url=$('.id_getVendor').val();
+	}
+	if(url=='@session.get("currencyId")'){
+		$('#viewVendor').html('');
+		$('#vendorTable tbody tr').remove();
+		$('#vendorTable').append('<tr><td id="vendornodata" colspan="9">No data available</td></tr>');
+		return;
+	}
+	$.ajax({
+		type: "POST",
+    	url: "/viewVendorCurrencyReport",
+    	data:'primaryKey=&url='+url,
+    	dataType: "json",
+    	success: function(data){
+    		if(data.length>0){
+    			$('#vendorTable tbody tr').remove();
+    			var totalDr=0,totalCr=0,totalFDr=0,totalFCr=0,totalOpeningBalance=0,totalBalance=0;
+    			 $.each(data, function(key, value){
+    				 totalDr=totalDr+value[1];
+    				 totalCr=totalCr+value[0];
+    				 totalFCr=totalFCr+value[3];
+    				 totalFDr=totalFDr+value[2];
+    				 totalOpeningBalance=totalOpeningBalance+value[7]
+    				 var totalvalue=value[0]+value[1]+value[2]+value[3]+value[6]+value[7];
+    				//if(totalvalue != 0)
+     		            $("#vendorTable").append("<tr class='maintable'><td>"+value[5]+"</td><td>"+value[4]+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(value[6],'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(value[2],'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(value[3],'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(value[7],'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(value[1],'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(value[0],'@session.get("exponent")')+"</td></tr>");
+     		            if(url!=""){
+    		            $('#viewVendor').html('Vendor Name : '+value[5]);
+    		            }
+    		            else{
+    		            	$('#viewVendor').html('Vendor Name : All');
+    		            }
+    		        });
+    			 
+    			 $("#vendorTable").append("<tr><td></td><td class='text-right'>Total</td><td class='text-right amtValue'></td><td class='text-right amtValue'></td><td  class='text-right amtValue'></td><td class='text-right amtValue'>"+removeExponentFromAmount(totalOpeningBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(totalDr,'@session.get("exponent")')+"</td><td class='text-right amtValue'>"+removeExponentFromAmount(totalCr,'@session.get("exponent")')+"</td></tr>");
+    			 
+    			 $("#vendorTable").append("<div class='row'></div><div class='row'></div>");
+    			 totalBalance = totalOpeningBalance+totalCr-totalDr;
+    			 
+    			 $("#vendorTable").append("<tr><td></td><td></td><td class='text-right'></td><td class='text-right'></td><td  class='text-right'>TOTAL BALANCE</td><td class='text-right amtValue'>"+removeExponentFromAmount(totalBalance,'@session.get("exponent")')+"</td><td class='text-right amtValue'></td><td class='text-right amtValue'></td></tr>");
+     			
+    			 $('.amtValue').autoNumeric('init');
+  				$('.amtValue').autoNumeric('update');
+  				
+  				$('.amtValueEx').autoNumeric('init');
+  				$('.amtValueEx').autoNumeric('update',{aSep:',',aDec:'.',mDec:'@play.Play.application().configuration().getString("application.currency.exponent")',mRound: 's' });
+    		}
+    		else{
+    			$('#vendornodata').remove();
+				$('#vendorTable').append('<tr><td id="vendornodata" colspan="9">No data available</td></tr>');
+			}
+    	}
+		});
+}
+
+function submitReport(value) {
+	
+	if(value==1){
+		$('#reportId').val(6001);
+	} else {
+		$('#reportId').val(6004);
+	}
+	$('#hiddenReporFlag').val(value);
+	
+	if($('#currency').val() !="")
+		$('#hiddenCurrency').val($('.id_getCurrency').val());
+	else
+		$('#hiddenCurrency').val('');
+	if($('#vendor1').val() !="")
+		$('#hiddenCustomer').val($('.id_getVendor').val());
+	else
+		$('#hiddenCustomer').val('');
+	
+	$('#reportForm').submit();
+}
+
+function resetVendor(){
+	if($('#vendor1').val()==""){
+		$('.id_getVendor').val('');	
+	}
+}
+
+function snackbar() {
+    var x = document.getElementById("snackbar")
+    x.className = "show";
+    x.className = x.className.replace("show", "");
+}
+
+</script>
+
+}

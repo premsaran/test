@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="report1" language="groovy" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="8144cba3-b4ae-4607-88e9-78f324abe3ba">
+	<property name="ireport.zoom" value="2.0"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="Dr_Total" class="java.lang.String"/>
+	<parameter name="Cr_Total" class="java.lang.String"/>
+	<parameter name="Profits" class="java.lang.String"/>
+	<parameter name="Profit" class="java.lang.String"/>
+	<parameter name="c_name" class="java.lang.String"/>
+	<parameter name="StartDateLable" class="java.lang.String"/>
+	<parameter name="StartDate" class="java.lang.String"/>
+	<parameter name="endDate" class="java.lang.String"/>
+	<parameter name="currencyName" class="java.lang.String"/>
+	<field name="TO_AC" class="java.lang.String"/>
+	<field name="AMT" class="java.lang.String"/>
+	<field name="RATE" class="java.lang.String"/>
+	<field name="DR_AMT" class="java.lang.String"/>
+	<field name="CR_AMT" class="java.lang.String"/>
+	<title>
+		<band height="106" splitType="Stretch">
+			<staticText>
+				<reportElement x="156" y="10" width="241" height="20" uuid="20ad2aab-461f-41d9-a6f9-e598377c42f8"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="15" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Currency Wise Profit & Loss]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="75" width="100" height="20" uuid="1a83af6d-3666-4b5b-a8c9-fd093666c7ca"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{StartDateLable}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="103" y="74" width="100" height="20" uuid="c5510749-85ea-4260-be01-ab8c89f69096"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{StartDate}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="353" y="75" width="100" height="20" uuid="4190061e-3a0a-439b-94e5-0dced50e6991"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[EndDate  :]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="455" y="75" width="81" height="20" uuid="8e59a884-8896-47b5-b378-fe6d68543edf"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{endDate}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="229" y="36" width="100" height="20" uuid="04a3a5e7-2f6f-4956-aac2-ee2022ca8880"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{currencyName}]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="27" splitType="Stretch">
+			<frame>
+				<reportElement mode="Opaque" x="0" y="0" width="555" height="27" backcolor="#CCCCCC" uuid="b2669748-781c-486e-b11e-7ec4a78856b1"/>
+				<staticText>
+					<reportElement x="0" y="0" width="122" height="27" uuid="9e3a744b-508a-480e-b6ab-4da597978d66"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" isBold="true"/>
+					</textElement>
+					<text><![CDATA[To Account]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="331" y="0" width="98" height="27" uuid="ec9b9cd6-8a5c-4b5c-9e12-cb44f9b016f1"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Debit]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="429" y="0" width="126" height="27" uuid="967969e6-1e5c-4c90-926b-529d728f40e3"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font isBold="true"/>
+					</textElement>
+					<text><![CDATA[Credit]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="122" y="0" width="107" height="27" uuid="54a5f902-c204-4e9e-a935-38fd9d19a12f"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" size="11" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Amount]]></text>
+				</staticText>
+				<staticText>
+					<reportElement x="229" y="0" width="102" height="27" uuid="00f95dbc-d68e-4d64-9d87-93b2ccd6ec04"/>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font fontName="Arial" isBold="true"/>
+					</textElement>
+					<text><![CDATA[Rate]]></text>
+				</staticText>
+			</frame>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="0" y="0" width="122" height="20" uuid="861ce27e-0465-4b2a-b9b9-d73e329b4f1c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{TO_AC}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="122" y="0" width="107" height="20" uuid="9f9c5cf5-b135-4dea-b358-85a16c9880a7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{AMT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="229" y="0" width="102" height="20" uuid="00d2fa00-56e8-4104-a271-304a33545a52"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{RATE}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="331" y="0" width="100" height="20" uuid="a2000429-5ca4-4538-9451-bd4481d1f65a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$F{DR_AMT}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="429" y="0" width="126" height="20" uuid="7036a028-e0f6-4aaf-8fef-3f95993c36d6"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{CR_AMT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="102" splitType="Stretch">
+			<textField isBlankWhenNull="true">
+				<reportElement x="331" y="0" width="98" height="20" uuid="781c4e17-4600-4095-ac1e-e2b606382cc7"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{Dr_Total}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="431" y="0" width="124" height="20" uuid="5d6c7c2e-4f82-4656-99e0-4d652a096569"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{Cr_Total}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="229" y="0" width="100" height="20" uuid="b0b14f05-d556-431e-9505-9ae46dd33898"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[Total :]]></text>
+			</staticText>
+			<textField isBlankWhenNull="true">
+				<reportElement x="378" y="29" width="100" height="20" uuid="59fab29b-7b27-4519-bfd0-45464c47f671"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$P{Profit}]]></textFieldExpression>
+			</textField>
+			<textField isBlankWhenNull="true">
+				<reportElement x="278" y="29" width="100" height="20" uuid="314023f9-5e47-4dab-8302-cea40ded423d"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{Profits}]]></textFieldExpression>
+			</textField>
+		</band>
+	</summary>
+</jasperReport>

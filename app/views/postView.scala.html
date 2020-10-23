@@ -1,0 +1,12 @@
+@()
+<form method="post" id="urlId" action="">
+<input type="hidden" id="primaryKeyIdForm" name="primaryKey">
+</form>
+<script>
+
+function postRequest(url,primaryKeyId){
+	$('#urlId').attr('action',url);
+	$('#primaryKeyIdForm').val(primaryKeyId);
+	$('#urlId').submit();
+}
+</script>

@@ -1,0 +1,102 @@
+@()
+@views.html.main(){
+<div class="row">
+    <div class="col-md-12">
+        <ol class="breadcrumb breadcrumb-txt-size">
+            <li><a href="#">Home</a></li>
+			<li class="active"><a href="#">Currency Report</a></li>
+        </ol>
+    </div>
+</div>
+
+<div class="col-md-12">
+<form id="reportForm" class="form-horizontal" action="@controllers.routes.ReportController.downloadReport()" method="post">
+    <div class="row">
+         <div class="form-group">
+               	<label class="control-label col-md-2">Currency</label>
+               	<div class="col-md-3">
+               	 <input type="text"  class="form-control" name="test2" id="currency" placeholder="Search currency">
+               	<input type="hidden" id="hiddenCurrency" name="currencyId">
+               	<input type="hidden" id="tenantId" name="tenantId" value="@session.get("tenantId")">
+               	<input type="hidden" id="reportId" name="reportId" value="6001">
+               	
+               	</div>
+            </div>
+         </div>
+		<br><br>
+      	<div align="center" class="col-md-6">
+        	<button class="btn btn-primary submit"  onclick="submitReport()" type="button"><i class="fa fa-download"></i> Download</button>
+      </div>
+</form>
+</div>
+
+<script>
+
+$('#currency').autocomplete({
+	source :function( request, response ) {
+	    $.ajax({
+	       url: "/searchCurrency",
+	       dataType: "json",
+	       success: function( data ) {
+	           response($.map(data, function(item) {
+	                 return {
+	                     label : item.data,
+	                     value : item.value
+	                 };
+	           }));
+	       }
+	    });
+	   },
+	   select: function (event, ui) {
+	         $("#currency").val(ui.item.label);
+	         $("#value").val(ui.item.value);
+	         return false;
+	   },
+	   focus: function (event, ui) {
+		    this.value = ui.item.label;
+		     event.preventDefault();
+		}
+	   
+	});
+
+
+	$('#vendor').autocomplete({
+		source :function( request, response ) {
+		    $.ajax({
+		       url: "/searchCustomer",
+		       dataType: "json",
+		       success: function( data ) {
+		           response($.map(data, function(item) {
+		                 return {
+		                     label : item.data,
+		                     value : item.value
+		                 };
+		           }));
+		       }
+		    });
+		   },
+		   select: function (event, ui) {
+		         $("#vendor").val(ui.item.label);
+		         $("#value").val(ui.item.value);
+		         return false;
+		   },
+		   focus: function (event, ui) {
+			    this.value = ui.item.label;
+			     event.preventDefault();
+			}
+		   
+		});
+	
+
+</script>
+
+<script>
+function submitReport() {
+	debugger
+	if($('#currency').val() !="")
+		$('#hiddenCurrency').val($('#currency').next('span').text());
+	$('#reportForm').submit();
+}
+
+</script>
+}
